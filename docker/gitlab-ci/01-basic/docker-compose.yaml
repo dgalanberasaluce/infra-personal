@@ -1,6 +1,5 @@
 version: "3"
 services:
-  # Previously need to run: bash -ac 'source .env && ./singleuser_jupyterlab_build.sh' 
   gitlab-runner:
     image: gitlab/gitlab-runner
     volumes:
