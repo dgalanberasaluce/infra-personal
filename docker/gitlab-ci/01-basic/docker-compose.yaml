@@ -1,0 +1,14 @@
+version: "3"
+services:
+  # Previously need to run: bash -ac 'source .env && ./singleuser_jupyterlab_build.sh' 
+  gitlab-runner:
+    image: gitlab/gitlab-runner
+    volumes:
+      - ./gitlab-runner-config:/etc/gitlab-runner
+      # Bind Docker socket on the host so we can connect to the daemon from
+      # within the container
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+      # Gitlab project|repo mock
+      - ./gitlab-project-mock:$PWD/gitlab-project-mock:r
+    restart: always
+    privileged: true
