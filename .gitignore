@@ -40,6 +40,7 @@ terraform.rc
 
 # Ignore gitlab-ci configuration
 **/gitlab-ci/**/gitlab-runner-config
+!**/gitlab-ci/**/gitlab-runner-config/.placeholder
 
 # Ignore nested .git folders
 # required for:
