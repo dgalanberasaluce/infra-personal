@@ -32,3 +32,17 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Ignore vscode workspace configuration
+.vscode/*
+
+**/.envgit 
+
+# Ignore gitlab-ci configuration
+**/gitlab-ci/**/gitlab-runner-config
+
+# Ignore nested .git folders
+# required for:
+# - docker/gitlab-ci
+**/.git
+!/.git

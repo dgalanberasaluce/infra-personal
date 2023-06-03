@@ -1,0 +1,11 @@
+image: alpine:latest
+
+# variables:
+#   CI_DEBUG_TRACE: "true"
+
+test-job1:
+  script:
+    - echo "Hello world"
+
+    
+
