@@ -1,0 +1,17 @@
+version: "3"
+services:
+  rabbitmq:
+    image: rabbitmq:3.11.17-management-alpine
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./data:/var/lib/rabbitmq
+      - ./log:/var/log/rabbitmq
+    networks:
+        - rabbitmq_go_net
+    restart: no
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge
