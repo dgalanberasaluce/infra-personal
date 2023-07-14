@@ -1,0 +1,73 @@
+# https://github.com/getsentry/self-hosted/tree/master
+x-restart-policy: &restart_policy
+  restart: no
+x-depends_on-healthy: &depends_on-healthy
+  condition: service_healthy
+x-healthcheck-defaults: &healthcheck_defaults
+  # Avoid setting the interval too small, as docker uses much more CPU than one would expect.
+  # Related issues:
+  # https://github.com/moby/moby/issues/39102
+  # https://github.com/moby/moby/issues/39388
+  # https://github.com/getsentry/self-hosted/issues/1000
+  interval: "$HEALTHCHECK_INTERVAL"
+  timeout: "$HEALTHCHECK_TIMEOUT"
+  retries: 5 #$HEALTHCHECK_RETRIES
+  start_period: 10s
+x-sentry-defaults: &sentry-defaults
+  <<: *restart_policy
+  depends_on:
+    redis:
+      <<: *depends_on-healthy
+    postgres:
+      <<: *depends_on-healthy
+  
+version: "3"
+services:
+  web:
+    <<: *restart_policy
+    image: sentry:9.1.2
+    depends_on:
+      redis:
+        <<: *depends_on-healthy
+      postgres:
+        <<: *depends_on-healthy
+  worker:
+    <<: *sentry_defaults
+    command: run worker
+  redis:
+    <<: *restart_policy
+    image: "redis:6.2.12-alpine"
+    healthcheck:
+      <<: *healthcheck_defaults
+      test: redis-cli ping
+    volumes:
+    - "sentry-redis:/data"
+    ulimits:
+      nofile:
+        soft: 10032
+        hard: 10032
+  postgres:
+    <<: *restart_policy
+    image: postgres:14.5
+    healthcheck:
+      <<: *healthcheck_defaults
+      # Using default user "postgres" from sentry/sentry.conf.example.py or value of POSTGRES_USER if provided
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+    command:
+      [
+        "postgres",
+        "-c",
+        "wal_level=logical",
+        "-c",
+        "max_replication_slots=1",
+        "-c",
+        "max_wal_senders=1"
+      ]
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    volumes:
+      - "sentry-postgres:/var/lib/postgresql/data"
+
+volumes:
+  sentry-postgres:
+  sentry-redis:
