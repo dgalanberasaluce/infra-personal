@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: busybox-configmap
+data:
+  a: "1"
+  b: "2"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: busybox
+  labels:
+    app: busybox
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: busybox
+  serviceName: ""
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        command: ['sh', '-c', 'echo "Printing environment variables: ${a}" && tail -f /dev/null']
+        envFrom:
+        - configMapRef:
+          name: busybox-configmap
+      #   volumeMounts:
+      #   - name: sample-config
+      #     mountPath: /etc/config
+      # volumes:
+      # - name: sample-config
+      #   configMap:
+      #     name: busybox-configmap
