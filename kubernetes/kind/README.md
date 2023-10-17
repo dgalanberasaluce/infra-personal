@@ -14,3 +14,11 @@ Get the latest image from https://github.com/kubernetes-sigs/kind/releases
 kubectl apply -k metrics-server
 kubectl apply -k kube-state-metrics/k8s-v{kubernetes-version}/
 ```
+
+## Connect to a node (container)
+```bash
+# Get container name
+docker ps -a 
+# sh into container
+docker exec -it <container-name> sh
+```
