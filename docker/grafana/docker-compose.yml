@@ -1,0 +1,30 @@
+# https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/#run-grafana-via-docker-compose
+version: '3.8'
+
+services:
+  grafana:
+    # https://hub.docker.com/r/grafana/grafana
+    image: grafana/grafana:10.4.2
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      # Default environment variables
+      # https://grafana.com/docs/grafana/latest/setup-grafana/configure-docker/
+      # - GF_PATHS_CONFIG=/etc/grafana/grafana.ini
+      # - GF_PATHS_DATA=/var/lib/grafana
+      # - GF_PATHS_HOME=/usr/share/grafana
+      # - GF_PATHS_LOGS=/var/log/grafana
+      # - GF_PATHS_PLUGINS=/var/lib/grafana/plugins
+      # - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
+      - ./jsonnet-test/dashboards/generated:/etc/grafana/custom
+      # - ./jsonnet-test/dashboards/generated:/etc/dashboards
+
+# Explicitly define the persistent volume for your data storage
+volumes:
+  grafana-data: {}
