@@ -94,3 +94,7 @@ terraform.rc
 # - docker/gitlab-ci
 **/.git
 !/.git
+
+
+#
+**/.env
