@@ -4,7 +4,7 @@ version: '3.8'
 services:
   grafana:
     # https://hub.docker.com/r/grafana/grafana
-    image: grafana/grafana:10.4.2
+    image: grafana/grafana:9.5.19
     container_name: grafana
     restart: unless-stopped
     ports:
@@ -21,9 +21,10 @@ services:
       # - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     volumes:
       - grafana-data:/var/lib/grafana
+      # - ./grafana/grafana.ini:/etc/grafana/grafana.ini
       - ./provisioning:/etc/grafana/provisioning
-      - ./jsonnet-test/dashboards/generated:/etc/grafana/custom
-      # - ./jsonnet-test/dashboards/generated:/etc/dashboards
+      # Custom dashboards
+      - ./dashboards:/var/lib/grafana/dashboards
 
 # Explicitly define the persistent volume for your data storage
 volumes:

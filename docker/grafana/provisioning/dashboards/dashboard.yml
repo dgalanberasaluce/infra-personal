@@ -1,6 +1,14 @@
 apiVersion: 1
 
 providers:
+  - name: "dashboards"
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 30 #how often Grafana will scan for changed dashboards
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true
   - name: "Operations"
     orgId: 1
     folder: "operations"
@@ -9,10 +17,3 @@ providers:
     updateIntervalSeconds: 10 #how often Grafana will scan for changed dashboards
     options:
       path: /etc/grafana/custom
-  # - name: "dashboards"
-  #   orgId: 2
-  #   type: file
-  #   updateIntervalSeconds: 30 #how often Grafana will scan for changed dashboards
-  #   options:
-  #     path: /etc/dashboards
-  #     foldersFromFilesStructure: true
