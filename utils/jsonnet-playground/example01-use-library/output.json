@@ -1,0 +1,12 @@
+{
+   "example01-deployment": {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+         "labels": {
+            "app": "example01"
+         },
+         "name": "example01-deployment"
+      }
+   }
+}
