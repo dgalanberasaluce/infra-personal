@@ -1,5 +1,8 @@
 # GITALAB-CI - gitlab-runner
 
+> [!WARNING]
+> **DEPRECATED** - This method of deploying a gitlab-runner was deprecated in Gitlab 16.x
+
 There are, at least, two aims for setting up a gitlab-runner locally:
 1. Test gitlab-ci configuration (It is very limited)
 2. Using it as gitlab-runner for a project 
