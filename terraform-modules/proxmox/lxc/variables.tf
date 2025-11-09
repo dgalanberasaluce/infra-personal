@@ -1,26 +1,27 @@
 # Required
 variable "node_name" {
-  description = "The Proxmox node where the LXC container will be created."
+  description = "The Proxmox node where the LXC container will be created. It is not required if the lxc tf resource was imported."
   type        = string
+  default     = null
 }
 
-variable "lxc_template" {
+variable "lxc_ostemplate" {
   description = "The LXC template to use for creating the container."
   type        = string
-  default     = "ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+  default     = null
 }
 
 # Storage
 variable "rootfs_storage" {
-  description = "The storage location for the root filesystem of the LXC container."
-  type        = string
-  default     = "local-lvm"
-}
-
-variable "rootfs_storage_size" {
-  description = "The size of the root filesystem for the LXC container."
-  type        = string
-  default     = "8G"
+  description = "List of network configurations for the LXC container."
+  type = object({
+    storage = optional(string, null)
+    size    = optional(string, null)
+  })
+  default = {
+    storage = "local-lvm"
+    size    = "8G"
+  }
 }
 
 # Optional
@@ -75,13 +76,6 @@ variable "lxc_password" {
   sensitive   = true
 }
 
-
-variable "lxc_tags" {
-  description = "Tags to assign to the LXC container."
-  type        = list(string)
-  default     = []
-}
-
 variable "lxc_networks" {
   description = "List of network configurations for the LXC container."
   type = list(object({
@@ -97,4 +91,16 @@ variable "lxc_networks" {
       ip     = "dhcp"
     }
   ]
+}
+
+variable "lxc_description" {
+  description = "Description for the LXC container seen in the proxmox web interface"
+  type        = string
+  default     = ""
+}
+
+variable "lxc_tags" {
+  description = "Tags to assign to the LXC container."
+  type        = list(string)
+  default     = []
 }

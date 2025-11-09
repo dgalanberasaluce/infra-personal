@@ -1,8 +1,9 @@
 locals {
   ostemplates = {
-    "ubuntu-24.04" = "ubuntu-24.04-standard_24.04-1_amd64.tar.gz"
+    "ubuntu-24.04" = "ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
     "debian-12"    = "debian-12-standard_12.0-1_amd64.tar.gz"
     "centos-8"     = "centos-8-standard_8.3-1_amd64.tar.gz"
+    "alpine-3.22"  = "alpine-3.22-default_20250617_amd64.tar.xz"
   }
   cmode = "tty"
 }
@@ -13,7 +14,7 @@ resource "proxmox_lxc" "this" {
   target_node = var.node_name
   hostname    = var.lxc_hostname
   vmid        = var.vm_id # Ensure unique VMIDs
-  ostemplate  = "local:vztmpl/${var.lxc_template}"
+  ostemplate  = var.lxc_ostemplate != null ? "local:vztmpl/${var.lxc_ostemplate}" : null
   password    = var.lxc_password
 
   ############## 
@@ -29,9 +30,18 @@ resource "proxmox_lxc" "this" {
   swap   = var.lxc_memory_swap
 
   # storage
-  rootfs {
-    storage = var.rootfs_storage
-    size    = var.rootfs_storage_size
+  dynamic "rootfs" {
+    for_each = var.rootfs_storage == null ? [] : [var.rootfs_storage]
+
+    content {
+      acl       = false
+      quota     = false
+      replicate = false
+      ro        = false
+      shared    = false
+      storage   = lookup(rootfs.value, "storage", null)
+      size      = lookup(rootfs.value, "size", null)
+    }
   }
 
   ##############
@@ -65,9 +75,10 @@ resource "proxmox_lxc" "this" {
       name   = network.value.name
       bridge = network.value.bridge
       ip     = network.value.ip
-      type   = lookup(network.value, "type", "veth")
     }
   }
+
+  description = var.lxc_description
 
   tags = join(
     ";",
