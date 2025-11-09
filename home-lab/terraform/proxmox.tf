@@ -1,4 +1,4 @@
-module "caddy-lxc" {
+module "caddy_lxc" {
   source = "../../terraform-modules/proxmox/lxc"
 
   lxc_hostname = "alpine-caddy"
@@ -53,5 +53,90 @@ module "caddy-lxc" {
 
   lxc_tags = [
     "community-script", "webserver"
+  ]
+}
+
+module "minio_lxc" {
+  source       = "../../terraform-modules/proxmox/lxc"
+  lxc_hostname = "minio"
+  vm_id        = 103
+
+  lxc_cores       = 1
+  lxc_cpulimit    = 0
+  lxc_memory      = 1024
+  lxc_memory_swap = 512
+
+  rootfs_storage = {
+    storage = "nvme4tb"
+    size    = "5G"
+  }
+
+  lxc_networks = [
+    {
+      name   = "eth0"
+      bridge = "vmbr0"
+      ip     = "dhcp"
+    }
+  ]
+  lxc_tags = [
+    "object-storage"
+  ]
+
+}
+
+module "technitiumdns_lxc" {
+  source = "../../terraform-modules/proxmox/lxc"
+
+  lxc_hostname = "technitiumdns"
+  vm_id        = 110
+
+  lxc_cores       = 1
+  lxc_cpulimit    = 0
+  lxc_memory      = 512
+  lxc_memory_swap = 512
+
+  rootfs_storage = {
+    storage = "nvme4tb"
+    size    = "2G"
+  }
+
+  lxc_networks = [
+    {
+      name   = "eth0"
+      bridge = "vmbr0"
+      ip     = "dhcp"
+    }
+  ]
+
+  lxc_tags = [
+    "dns"
+  ]
+}
+
+module "immich_lxc" {
+  source       = "../../terraform-modules/proxmox/lxc"
+  lxc_hostname = "immich"
+  vm_id        = 104
+
+  lxc_cores       = 4
+  lxc_cpulimit    = 0
+  lxc_memory      = 1024 * 4
+  lxc_memory_swap = 512
+
+  rootfs_storage = {
+    storage = "nvme4tb"
+    size    = "50G"
+  }
+
+  lxc_networks = [
+    {
+      name   = "eth0"
+      bridge = "vmbr0"
+      ip     = "dhcp"
+    }
+  ]
+
+  lxc_tags = [
+    "photos"
   ]
 }
