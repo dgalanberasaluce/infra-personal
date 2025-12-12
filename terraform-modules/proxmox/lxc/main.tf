@@ -15,7 +15,9 @@ resource "proxmox_lxc" "this" {
   hostname    = var.lxc_hostname
   vmid        = var.vm_id # Ensure unique VMIDs
   ostemplate  = var.lxc_ostemplate != null ? "local:vztmpl/${var.lxc_ostemplate}" : null
-  password    = var.lxc_password
+
+  password        = var.lxc_password
+  ssh_public_keys = var.ssh_public_keys
 
   ############## 
   # Resources #
@@ -59,6 +61,10 @@ resource "proxmox_lxc" "this" {
 
   protection   = false
   unprivileged = true
+
+  features {
+    nesting = var.lxc_features_nesting
+  }
 
   # features {
   #   nesting = true # Activate only if docker or systemd-nspawn is required

@@ -5,7 +5,7 @@ terraform {
     # https://github.com/bpg/terraform-provider-proxmox
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.2-rc05"
+      version = "3.0.2-rc06"
     }
   }
 }
