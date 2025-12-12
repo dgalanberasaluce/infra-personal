@@ -24,6 +24,13 @@ variable "vm_ssh_key" {
   sensitive   = true
 }
 
+# Shared variables
+variable "default_password" {
+  description = "Default password for SSH to VMs and LXCs"
+  type        = string
+  sensitive   = true
+}
+
 # VM Template Configuration
 # Copy https://www.virtualizationhowto.com/2025/08/instant-vms-and-lxcs-on-proxmox-my-go-to-terraform-templates-for-quick-deployments/
 variable "vm_template" {

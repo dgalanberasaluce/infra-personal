@@ -140,3 +140,42 @@ module "immich_lxc" {
     "photos"
   ]
 }
+
+module "bitwarden_lxc" {
+  source       = "../../terraform-modules/proxmox/lxc"
+
+  node_name      = "proxmox"
+
+  lxc_hostname = "vaultwarden"
+  # vm_id        = 114
+
+
+  lxc_ostemplate = "debian-13-standard_13.1-2_amd64.tar.zst"
+
+  lxc_cores = 1
+  # lxc_cpulimit    = 0
+  lxc_memory = 1024
+  # lxc_memory_swap = 512
+
+  lxc_password   = var.default_password
+  ssh_public_keys = local.default_ssh_public_key
+
+  lxc_features_nesting = true
+
+  rootfs_storage = {
+    storage = "nvme4tb"
+    size    = "10G"
+  }
+
+  lxc_networks = [
+    {
+      name   = "eth0"
+      bridge = "vmbr0"
+      ip     = "dhcp"
+    }
+  ]
+
+  lxc_tags = [
+    "password-manager"
+  ]
+}

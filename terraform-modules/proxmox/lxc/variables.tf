@@ -76,6 +76,12 @@ variable "lxc_password" {
   sensitive   = true
 }
 
+variable "ssh_public_keys" {
+  description = "SSH public keys to be added to the root user's authorized_keys file"
+  type        = string
+  default     = null
+}
+
 variable "lxc_networks" {
   description = "List of network configurations for the LXC container."
   type = list(object({
@@ -103,4 +109,10 @@ variable "lxc_tags" {
   description = "Tags to assign to the LXC container."
   type        = list(string)
   default     = []
+}
+
+variable "lxc_features_nesting" {
+  description = "Enable nesting feature for the LXC container."
+  type        = bool
+  default     = false
 }
