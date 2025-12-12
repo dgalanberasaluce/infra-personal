@@ -5,3 +5,4 @@ Terraform to manage my personal infrastructure
 - https://github.com/JamesTurland/JimsGarage
 - https://github.com/lingrino/infra-personal
 - https://github.com/ChristianLempa
+- https://github.com/mkuthan/homelab-public
