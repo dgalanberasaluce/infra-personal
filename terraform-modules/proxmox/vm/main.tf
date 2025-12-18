@@ -39,14 +39,18 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   # VM Hardware Configuration
-  agent { # qemu guest agent
-    enabled = var.vm_enable_qemu_agent
+  dynamic "agent" { # qemu guest agent
+    for_each = var.vm_enable_qemu_agent != null ? [1] : []
+
+    content {
+      enabled = var.vm_enable_qemu_agent
+    }
   }
   boot_order    = var.vm_boot_order
   scsi_hardware = var.vm_scsihw
 
   dynamic "vga" {
-    for_each = var.vm_display == null ? [] : [var.vm_display]
+    for_each = var.vm_display != null ? [var.vm_display] : []
 
     content {
       type   = vga.value.type
@@ -56,11 +60,11 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   # if agent is not enabled, the VM may not be able to shutdown properly, and may need to be forced off
   # https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_vm#qemu-guest-agent
-  stop_on_destroy = var.vm_enable_qemu_agent ? false : true
+  stop_on_destroy = var.vm_enable_qemu_agent != null ? !var.vm_enable_qemu_agent : true
 
   # Clone or boot from disk (cdrom)
   dynamic "cdrom" {
-    for_each = var.clone_vm ? [] : [1]
+    for_each = var.clone_vm || !var.vm_boot_from_disk ? [] : [1]
 
     content {
       #<datastore_id>:<content_type>/<file_name>
@@ -82,26 +86,36 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   # Disk Configuration
   dynamic "disk" {
-    for_each = var.clone_vm ? [] : [1]
+    for_each = var.clone_vm ? [] : (length(var.vm_disks) > 0 ? var.vm_disks : [{}])
 
     content {
-      datastore_id = contains(local.available_storage, "nvme4tb") ? "nvme4tb" : null
-      interface    = "scsi0"
-      size         = "32"
-      # cache = "none"
-      # iothread = false
-      backup    = false
-      replicate = false
+      backup       = length(var.vm_disks) > 0 && disk.value.backup != null ? disk.value.backup : false
+      cache        = length(var.vm_disks) > 0 && disk.value.cache != null ? disk.value.cache : "none"
+      iothread     = length(var.vm_disks) > 0 && disk.value.iothread != null ? disk.value.iothread : false
+      datastore_id = length(var.vm_disks) > 0 && disk.value.datastore_id != null ? disk.value.datastore_id : contains(local.available_storage, "nvme4tb") ? "nvme4tb" : null
+      interface    = length(var.vm_disks) > 0 && disk.value.interface != null ? disk.value.interface : "scsi0"
+      size         = length(var.vm_disks) > 0 && disk.value.size != null ? disk.value.size : "32"
+      replicate    = length(var.vm_disks) > 0 && disk.value.replicate != null ? disk.value.replicate : false
     }
   }
 
   # Network Configuration
   dynamic "network_device" {
-    for_each = var.enable_network ? [1] : []
+    for_each = var.enable_network ? (length(var.vm_network_devices) > 0 ? var.vm_network_devices : [{}]) : []
 
     content {
-      bridge   = var.vm_network_bridge
-      firewall = true
+      bridge   = length(var.vm_network_devices) > 0 ? network_device.value.bridge : var.vm_network_bridge
+      firewall = length(var.vm_network_devices) > 0 ? network_device.value.enable_firewall : true
     }
   }
+
+  dynamic "operating_system" {
+    for_each = var.operating_system_type != null ? [1] : []
+
+    content {
+      type = var.operating_system_type
+    }
+  }
+
+  machine = var.vm_machine_type
 }

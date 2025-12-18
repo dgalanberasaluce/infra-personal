@@ -119,6 +119,12 @@ variable "vm_boot_order" {
   # default     = ["ide0", "net0"]
 }
 
+variable "vm_boot_from_disk" {
+  description = "Whether to boot the VM from disk"
+  type        = bool
+  default     = false
+}
+
 variable "vm_scsihw" {
   description = "SCSI hardware type"
   type        = string
@@ -133,7 +139,7 @@ variable "vm_scsihw" {
 variable "vm_enable_qemu_agent" {
   description = "Enable QEMU guest agent"
   type        = bool
-  default     = false
+  default     = null
 }
 
 variable "vm_display" {
@@ -152,6 +158,23 @@ variable "vm_display" {
     condition     = var.vm_display == null || contains(local.vga_hardware_without_memory, var.vm_display.type) || (var.vm_display.memory >= 8 && contains(local.vga_hardware_with_memory, var.vm_display.type))
     error_message = "If vm_display is set, memory must be at least 8 MB and type must be one of 'std', 'qxl', 'virtio', 'vmware', or 'none'."
   }
+}
+
+variable "operating_system_type" {
+  description = "The operating system configuration"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.operating_system_type == null || contains(["l26", "l24", "l23", "win10", "win11", "other"], var.operating_system_type)
+    error_message = "If operating_system_type is set, it must be one of 'l26', 'l24', 'l23', 'win10', 'win11', or 'other'."
+  }
+}
+
+variable "vm_machine_type" {
+  description = "The machine type for the VM. Defaults of module to `pc`"
+  type        = string
+  default     = null
 }
 
 # Network Configuration
@@ -173,6 +196,15 @@ variable "vm_network_bridge" {
   default     = "vmbr0"
 }
 
+variable "vm_network_devices" {
+  description = ""
+  type = list(object({
+    bridge          = string
+    enable_firewall = bool
+  }))
+  default = []
+}
+
 # Disk Configuration
 variable "vm_disk_type" {
   description = "Disk type for the VM"
@@ -187,9 +219,24 @@ variable "vm_disk_storage" {
 }
 
 variable "vm_disk_size" {
-  description = "Size of the VM disk"
-  type        = string
-  default     = "10G"
+  description = "Size of the VM disk (GB)"
+  type        = number
+  default     = 10
+}
+
+variable "vm_disks" {
+  description = "List of disk configurations for the VM"
+  type = list(object({
+    aio          = optional(string)
+    backup       = optional(bool)
+    cache        = optional(string)
+    iothread     = optional(bool)
+    datastore_id = optional(string)
+    interface    = optional(string)
+    size         = number
+    replicate    = optional(bool)
+  }))
+  default = []
 }
 
 # Cloud-Init Configuration

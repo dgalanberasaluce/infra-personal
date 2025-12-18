@@ -5,7 +5,7 @@ module "this" {
 
   vm_name        = "terraform-provider-proxmox-ubuntu-vm"
   vm_description = "Managed by Terraform"
-  vm_tags        = ["terraform", "ubuntu"]
+  vm_tags        = ["ubuntu"]
 
   enable_network = false
 }
