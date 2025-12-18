@@ -5,7 +5,7 @@ module "this" {
 
   vm_name        = "terraform-ubuntu-clone"
   vm_description = "Managed by Terraform"
-  vm_tags        = ["terraform", "ubuntu"]
+  vm_tags        = ["ubuntu"]
 
   clone_vm = true
   clone_vm_target = {

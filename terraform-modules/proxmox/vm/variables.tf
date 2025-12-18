@@ -209,5 +209,5 @@ variable "vm_ci_password" {
 variable "vm_tags" {
   description = "Tags for the VM"
   type        = list(string)
-  default     = ["terraform"]
+  default     = ["managed-by-terraform"]
 }

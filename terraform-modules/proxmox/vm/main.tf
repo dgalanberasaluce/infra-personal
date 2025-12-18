@@ -3,7 +3,7 @@ data "proxmox_virtual_environment_vms" "all_vms" {
 }
 
 locals {
-  default_tags                = ["terraform"]
+  default_tags                = ["managed-by-terraform"]
   vga_hardware_with_memory    = ["std", "vmware", "qxl", "cirrus", "virtio"]
   vga_hardware_without_memory = ["none", "serial0", "serial1", "serial2", "serial3"]
   vga_hardware                = concat(local.vga_hardware_with_memory, local.vga_hardware_without_memory)
