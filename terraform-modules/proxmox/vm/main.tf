@@ -5,7 +5,7 @@ data "proxmox_virtual_environment_vms" "all_vms" {
 locals {
   default_tags                = ["managed-by-terraform"]
   vga_hardware_with_memory    = ["std", "vmware", "qxl", "cirrus", "virtio"]
-  vga_hardware_without_memory = ["none", "serial0", "serial1", "serial2", "serial3"]
+  vga_hardware_without_memory = ["none", "std", "serial0", "serial1", "serial2", "serial3"]
   vga_hardware                = concat(local.vga_hardware_with_memory, local.vga_hardware_without_memory)
   available_storage           = ["nvme4tb", "local-lvm"]
 
@@ -31,6 +31,8 @@ resource "proxmox_virtual_environment_vm" "this" {
     cores   = var.vm_cores
     sockets = var.vm_sockets
     type    = var.vm_cpu_type
+    flags   = var.vm_cpu_flags
+    units   = var.vm_cpu_units
   }
 
   memory {
@@ -118,4 +120,16 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   machine = var.vm_machine_type
+  bios    = var.vm_bios_type
+
+  dynamic "efi_disk" {
+    for_each = var.efi_disk != null ? [var.efi_disk] : []
+
+    content {
+      datastore_id      = efi_disk.value.datastore_id
+      file_format       = efi_disk.value.file_format
+      pre_enrolled_keys = efi_disk.value.pre_enrolled_keys
+      type              = efi_disk.value.type
+    }
+  }
 }

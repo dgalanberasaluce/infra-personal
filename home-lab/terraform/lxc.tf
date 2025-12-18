@@ -142,9 +142,9 @@ module "immich_lxc" {
 }
 
 module "bitwarden_lxc" {
-  source       = "../../terraform-modules/proxmox/lxc"
+  source = "../../terraform-modules/proxmox/lxc"
 
-  node_name      = "proxmox"
+  node_name = "proxmox"
 
   lxc_hostname = "vaultwarden"
   # vm_id        = 114
@@ -157,7 +157,7 @@ module "bitwarden_lxc" {
   lxc_memory = 1024
   # lxc_memory_swap = 512
 
-  lxc_password   = var.default_password
+  lxc_password    = var.default_password
   ssh_public_keys = local.default_ssh_public_key
 
   lxc_features_nesting = true

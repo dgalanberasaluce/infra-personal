@@ -88,6 +88,18 @@ variable "vm_cpu_type" {
   default     = "x86-64-v2-AES"
 }
 
+variable "vm_cpu_flags" {
+  description = "List of CPU flags for the VM"
+  type        = list(string)
+  default     = null
+}
+
+variable "vm_cpu_units" {
+  description = "CPU units for the VM"
+  type        = number
+  default     = null
+}
+
 variable "vm_memory" {
   description = "Amount of memory in MB for the VM"
   type        = number
@@ -177,6 +189,12 @@ variable "vm_machine_type" {
   default     = null
 }
 
+variable "vm_bios_type" {
+  description = "The BIOS implementation for the VM"
+  type        = string
+  default     = null
+}
+
 # Network Configuration
 variable "enable_network" {
   description = "Whether to enable network interface for the VM"
@@ -233,7 +251,7 @@ variable "vm_disks" {
     iothread     = optional(bool)
     datastore_id = optional(string)
     interface    = optional(string)
-    size         = number
+    size         = optional(number)
     replicate    = optional(bool)
   }))
   default = []
@@ -251,6 +269,18 @@ variable "vm_ci_password" {
   type        = string
   sensitive   = true
   default     = ""
+}
+
+# Other Configurations
+variable "efi_disk" {
+  description = "EFI disk configuration for the VM"
+  type = object({
+    datastore_id      = string
+    file_format       = string
+    pre_enrolled_keys = optional(bool)
+    type              = string
+  })
+  default = null
 }
 
 variable "vm_tags" {
