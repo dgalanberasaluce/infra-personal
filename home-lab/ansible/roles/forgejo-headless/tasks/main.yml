@@ -75,6 +75,7 @@
     force: yes
   register: binary_download
   tags: [install, upgrade]
+  notify: restart forgejo
 
 - name: Deploy app.ini configuration
   template:

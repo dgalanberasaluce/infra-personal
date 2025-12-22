@@ -5,9 +5,12 @@ RUN_MODE = {{ forgejo_run_mode }}
 RUN_USER = {{ forgejo_user }}
 
 [database]
-DB_TYPE  = {{ forgejo_db_type }}
-PATH     = {{ forgejo_home }}/data/forgejo.db
-SSL_MODE = disable
+DB_TYPE             = {{ forgejo_db_type }}
+PATH                = {{ forgejo_home }}/data/forgejo.db
+SSL_MODE            = disable
+{% if forgejo_db_type == 'sqlite3' %}
+SQLITE_JOURNAL_MODE = WAL
+{% endif %}
 
 [repository]
 ROOT = {{ forgejo_home }}/data/forgejo-repositories
@@ -26,11 +29,14 @@ INSTALL_LOCK = true  ; Disable initial set up page
 SECRET_KEY   = {{ forgejo_secret_key }}
 
 [service]
-DISABLE_REGISTRATION = false
+DISABLE_REGISTRATION = true ; Disable public sign-ups
 REQUIRE_SIGNIN_VIEW  = false
 
 [session]
 PROVIDER = file
+
+[cache]
+ADAPTER: twoqueue ; LRU cache
 
 [log]
 MODE      = file
