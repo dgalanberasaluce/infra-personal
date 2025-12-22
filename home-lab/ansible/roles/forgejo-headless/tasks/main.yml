@@ -7,11 +7,13 @@
       - gnupg2
     state: present
     update_cache: yes
+  tags: [install]
 
 - name: Create forgejo system group
   group:
     name: "{{ forgejo_group }}"
     system: yes
+  tags: [install]
 
 - name: Create forgejo system user
   user:
@@ -21,6 +23,7 @@
     home: "/home/{{ forgejo_user }}"
     system: yes
     create_home: yes
+  tags: [install]
 
 - name: Create directory structure
   file:
@@ -29,19 +32,38 @@
     owner: "{{ forgejo_user }}"
     group: "{{ forgejo_group }}"
     mode: '0750'
-  with_items:
+  loop:
     - "{{ forgejo_home }}"
     - "{{ forgejo_home }}/custom"
     - "{{ forgejo_home }}/data"
     - "{{ forgejo_home }}/log"
+    - "{{ forgejo_config_dir }}"
+  tags: [install, config]
 
-- name: Create configuration directory
-  file:
-    path: "{{ forgejo_config_dir }}"
-    state: directory
-    owner: root
-    group: "{{ forgejo_group }}"
-    mode: '0770'
+- name: Check current binary version
+  command: "{{ forgejo_bin_path }} --version"
+  register: current_version_check
+  failed_when: false
+  changed_when: false
+  tags: [upgrade, install]
+
+- name: Logic for binary upgrade
+  block:
+    - name: Backup current binary
+      copy:
+        src: "{{ forgejo_bin_path }}"
+        dest: "{{ forgejo_bin_path }}.bak"
+        remote_src: yes
+      ignore_errors: yes
+
+    - name: Remove old binary to force upgrade
+      file:
+        path: "{{ forgejo_bin_path }}"
+        state: absent
+  when: 
+    - current_version_check.rc == 0
+    - forgejo_version not in current_version_check.stdout
+  tags: [upgrade]
 
 - name: Download Forgejo binary
   get_url:
@@ -50,6 +72,9 @@
     mode: '0755'
     owner: root
     group: root
+    force: yes
+  register: binary_download
+  tags: [install, upgrade]
 
 - name: Deploy app.ini configuration
   template:
@@ -59,60 +84,50 @@
     group: "{{ forgejo_group }}"
     mode: '0640'
   no_log: true
-  register: forgejo_config_result
+  register: config_deploy
+  tags: [config]
   notify: restart forgejo
 
-- name: Ensure sqlite database file exists
-  copy:
-    content: ""
-    dest: "{{ forgejo_home }}/data/forgejo.db"
-    force: no
-    owner: "{{ forgejo_user }}"
-    group: "{{ forgejo_group }}"
-    mode: '0660'
-
-- name: Check if database is already initialized
-  command: sqlite3 {{ forgejo_home }}/data/forgejo.db "SELECT name FROM sqlite_master WHERE type='table' AND name='user';"
-  register: table_check
-  changed_when: false
-  failed_when: false
-  check_mode: no
-
-- name: Initialize database tables
-  become: yes
-  become_user: "{{ forgejo_user }}"
-  become_method: su
-  environment:
-    FORGEJO_WORK_DIR: "{{ forgejo_home }}"
-    GITEA_WORK_DIR: "{{ forgejo_home }}" # Legacy variable for compatibility
-  command: >
-    {{ forgejo_bin_path }} migrate 
-    --config {{ forgejo_config_dir }}/app.ini
-  when: table_check.stdout == ""
-  register: db_migrate
-  # changed_when: "'Database migration finished' in db_migrate.stdout"
-  failed_when: false # Forgejo may not return anything if it's already migrated
-
-- name: Create admin user if it does not exist
+- name: Database Initialization and Migration
   become: yes
   become_user: "{{ forgejo_user }}"
   become_method: su
   environment:
     FORGEJO_WORK_DIR: "{{ forgejo_home }}"
     GITEA_WORK_DIR: "{{ forgejo_home }}"
+  block:
+    - name: Check if database tables exist
+      command: sqlite3 {{ forgejo_home }}/data/forgejo.db "SELECT name FROM sqlite_master WHERE type='table' AND name='user';"
+      register: db_check
+      changed_when: false
+      failed_when: false
+    - name: Run migrations if new install or binary changed
+      command: "{{ forgejo_bin_path }} admin db migrate --config {{ forgejo_config_dir }}/app.ini"
+      when: db_check.stdout == "" or binary_download.changed  
+  tags: [database, upgrade]
+
+
+- name: Create initial admin user
+  become: yes
+  become_user: "{{ forgejo_user }}"
+  become_method: su
+  environment:
+    FORGEJO_WORK_DIR: "{{ forgejo_home }}"
   command: >
     {{ forgejo_bin_path }} admin user create 
     --username "{{ forgejo_admin_user }}" 
     --password "{{ forgejo_admin_password }}" 
-    --email "{{ forgejo_admin_email }}"
+    --email "{{ forgejo_admin_email }}" 
     --admin 
     --config {{ forgejo_config_dir }}/app.ini
   register: admin_creation
   no_log: true
+  when: db_check.stdout == ""
   failed_when: 
-  - admin_creation.rc != 0
-  - "'user already exists' not in admin_creation.stderr"
+      - admin_creation.rc != 0 
+      - "'user already exists' not in admin_creation.stderr"
   changed_when: "'successfully created' in admin_creation.stdout"
+  tags: [database]
 
 - name: Deploy systemd service unit
   template:
@@ -121,20 +136,23 @@
     owner: root
     group: root
     mode: '0644'
+  tags: [install]
   notify: restart forgejo
 
-- name: Enable and start Forgejo service
+- name: Ensure Forgejo is enabled and started
   systemd:
     name: forgejo
     enabled: yes
     state: started
     daemon_reload: yes
+  tags: [install, maintenance]
 
 # Store up to 4 weeks
-- name: Configure log rotation for Forgejo
+- name: Configure log rotation
   template:
     src: forgejo.logrotate.j2
     dest: /etc/logrotate.d/forgejo
     owner: root
     group: root
     mode: '0644'
+  tags: [maintenance]
