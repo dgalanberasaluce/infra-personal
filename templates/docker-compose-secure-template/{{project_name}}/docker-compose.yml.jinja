@@ -1,0 +1,50 @@
+x-common: &common
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+  deploy:
+    resources:
+      limits:
+        cpus: "2"
+        memory: 512M
+
+x-secure: &secure
+  # https://docs.docker.com/reference/compose-file/services/#user
+  user: "99:100" # user "nobody", group "users"
+  # https://docs.docker.com/reference/compose-file/services/#tty
+  tty: false
+  # https://docs.docker.com/reference/compose-file/services/#stdin_open
+  stdin_open: false 
+  # https://docs.docker.com/reference/compose-file/services/#read_only
+  read_only: true # Whole filesystem as read-only
+  # https://docs.docker.com/reference/compose-file/services/#security_opt
+  security_opt:
+  - no-new-privileges:true # The container can't elevate any privileges
+  # https://docs.docker.com/reference/compose-file/services/#cap_drop
+  # By default a container gets a lot of capabilities (https://github.com/moby/moby/blob/master/daemon/pkg/oci/caps/defaults.go#L6-L19)
+  cap_drop: 
+  - ALL # Drop all capabilities
+  # https://docs.docker.com/reference/compose-file/services/#tmpfs
+  tmpfs:
+  - /tmp:rw,noexec,nosuid,nodev,size=512m
+  # Restrict resources that the container can use
+  # https://docs.docker.com/reference/compose-file/services/#pids_limit
+  # https://docs.docker.com/reference/compose-file/services/#mem_limit
+  # https://docs.docker.com/reference/compose-file/services/#cpus
+  pids_limit: 10
+  mem_limit: 2g
+  cpus: 0.500
+
+services:
+  server:
+    <<: *common
+    container_name: {{project_name}}
+    image: {{project_name}}:<VERSION>@sha256:<SHA>
+    ports:
+      - "8080:8080"
+    # Mount data read-only
+    volumes:
+    - /path/to/host:/path/to/container:ro
