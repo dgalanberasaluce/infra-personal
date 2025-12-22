@@ -1,0 +1,6 @@
+- name: Setup Forgejo Git Server
+  hosts: 
+  - forgejo_lxc
+  become: true
+  roles:
+    - forgejo-headless

@@ -1,0 +1,140 @@
+- name: Install required system packages
+  apt:
+    name:
+      - git
+      - sqlite3
+      - wget
+      - gnupg2
+    state: present
+    update_cache: yes
+
+- name: Create forgejo system group
+  group:
+    name: "{{ forgejo_group }}"
+    system: yes
+
+- name: Create forgejo system user
+  user:
+    name: "{{ forgejo_user }}"
+    group: "{{ forgejo_group }}"
+    shell: /bin/bash
+    home: "/home/{{ forgejo_user }}"
+    system: yes
+    create_home: yes
+
+- name: Create directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ forgejo_user }}"
+    group: "{{ forgejo_group }}"
+    mode: '0750'
+  with_items:
+    - "{{ forgejo_home }}"
+    - "{{ forgejo_home }}/custom"
+    - "{{ forgejo_home }}/data"
+    - "{{ forgejo_home }}/log"
+
+- name: Create configuration directory
+  file:
+    path: "{{ forgejo_config_dir }}"
+    state: directory
+    owner: root
+    group: "{{ forgejo_group }}"
+    mode: '0770'
+
+- name: Download Forgejo binary
+  get_url:
+    url: "{{ forgejo_download_url }}"
+    dest: "{{ forgejo_bin_path }}"
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Deploy app.ini configuration
+  template:
+    src: app.ini.j2
+    dest: "{{ forgejo_config_dir }}/app.ini"
+    owner: "{{ forgejo_user }}"
+    group: "{{ forgejo_group }}"
+    mode: '0640'
+  no_log: true
+  register: forgejo_config_result
+  notify: restart forgejo
+
+- name: Ensure sqlite database file exists
+  copy:
+    content: ""
+    dest: "{{ forgejo_home }}/data/forgejo.db"
+    force: no
+    owner: "{{ forgejo_user }}"
+    group: "{{ forgejo_group }}"
+    mode: '0660'
+
+- name: Check if database is already initialized
+  command: sqlite3 {{ forgejo_home }}/data/forgejo.db "SELECT name FROM sqlite_master WHERE type='table' AND name='user';"
+  register: table_check
+  changed_when: false
+  failed_when: false
+  check_mode: no
+
+- name: Initialize database tables
+  become: yes
+  become_user: "{{ forgejo_user }}"
+  become_method: su
+  environment:
+    FORGEJO_WORK_DIR: "{{ forgejo_home }}"
+    GITEA_WORK_DIR: "{{ forgejo_home }}" # Legacy variable for compatibility
+  command: >
+    {{ forgejo_bin_path }} migrate 
+    --config {{ forgejo_config_dir }}/app.ini
+  when: table_check.stdout == ""
+  register: db_migrate
+  # changed_when: "'Database migration finished' in db_migrate.stdout"
+  failed_when: false # Forgejo may not return anything if it's already migrated
+
+- name: Create admin user if it does not exist
+  become: yes
+  become_user: "{{ forgejo_user }}"
+  become_method: su
+  environment:
+    FORGEJO_WORK_DIR: "{{ forgejo_home }}"
+    GITEA_WORK_DIR: "{{ forgejo_home }}"
+  command: >
+    {{ forgejo_bin_path }} admin user create 
+    --username "{{ forgejo_admin_user }}" 
+    --password "{{ forgejo_admin_password }}" 
+    --email "{{ forgejo_admin_email }}"
+    --admin 
+    --config {{ forgejo_config_dir }}/app.ini
+  register: admin_creation
+  no_log: true
+  failed_when: 
+  - admin_creation.rc != 0
+  - "'user already exists' not in admin_creation.stderr"
+  changed_when: "'successfully created' in admin_creation.stdout"
+
+- name: Deploy systemd service unit
+  template:
+    src: forgejo.service.j2
+    dest: /etc/systemd/system/forgejo.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart forgejo
+
+- name: Enable and start Forgejo service
+  systemd:
+    name: forgejo
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+# Store up to 4 weeks
+- name: Configure log rotation for Forgejo
+  template:
+    src: forgejo.logrotate.j2
+    dest: /etc/logrotate.d/forgejo
+    owner: root
+    group: root
+    mode: '0644'

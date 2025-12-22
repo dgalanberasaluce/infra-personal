@@ -1,0 +1,18 @@
+argument_specs:
+  main:
+    short_description: Required variables for forgejo.
+    options:
+      forgejo_domain:
+        type: str
+        required: true
+        description: >
+          Domain name or ip address where forgejo runs
+      forgejo_admin_user:
+        type: str
+        required: true
+      forgejo_admin_password:
+        type: str
+        required: true
+      forgejo_admin_email:
+        type: str
+        required: true
