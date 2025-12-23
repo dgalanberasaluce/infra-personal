@@ -1,0 +1,23 @@
+[Unit]
+Description=Forgejo
+After=network.target
+# Uncomment if using a local database service
+# After=postgresql.service mysql.service
+
+[Service]
+Type=simple
+User={{ forgejo_user }}
+Group={{ forgejo_group }}
+WorkingDirectory={{ forgejo_home }}
+Environment=USER={{ forgejo_user }} HOME=/home/{{ forgejo_user }} FORGEJO_WORK_DIR={{ forgejo_home }}
+ExecStart={{ forgejo_bin_path }} web --config {{ forgejo_config_dir }}/app.ini
+Restart=always
+RestartSec=5s
+
+# Hardening
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

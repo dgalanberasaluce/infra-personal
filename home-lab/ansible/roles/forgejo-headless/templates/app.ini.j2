@@ -1,0 +1,44 @@
+; https://forgejo.org/docs/next/admin/config-cheat-sheet
+
+APP_NAME = {{ forgejo_app_name }}
+RUN_MODE = {{ forgejo_run_mode }}
+RUN_USER = {{ forgejo_user }}
+
+[database]
+DB_TYPE             = {{ forgejo_db_type }}
+PATH                = {{ forgejo_home }}/data/forgejo.db
+SSL_MODE            = disable
+{% if forgejo_db_type == 'sqlite3' %}
+SQLITE_JOURNAL_MODE = WAL
+{% endif %}
+
+[repository]
+ROOT = {{ forgejo_home }}/data/forgejo-repositories
+
+[server]
+SSH_DOMAIN       = {{ forgejo_domain }}
+DOMAIN           = {{ forgejo_domain }}
+HTTP_PORT        = {{ forgejo_http_port }}
+ROOT_URL         = http://{{ forgejo_domain }}:{{ forgejo_http_port }}/
+DISABLE_SSH      = false
+SSH_PORT         = 22
+LFS_START_SERVER = true
+
+[security]
+INSTALL_LOCK = true  ; Disable initial set up page
+SECRET_KEY   = {{ forgejo_secret_key }}
+
+[service]
+DISABLE_REGISTRATION = true ; Disable public sign-ups
+REQUIRE_SIGNIN_VIEW  = false
+
+[session]
+PROVIDER = file
+
+[cache]
+ADAPTER: twoqueue ; LRU cache
+
+[log]
+MODE      = file
+LEVEL     = info
+ROOT_PATH = {{ forgejo_home }}/log

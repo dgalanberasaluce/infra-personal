@@ -1,3 +1,12 @@
+locals {
+  lxc_templates = {
+    alpine    = "alpine-3.22-default_20250617_amd64.tar.xz"
+    debian_12 = "debian-12-standard_12.7-1_amd64.tar.zst"
+    debian_13 = "debian-13-standard_13.1-2_amd64.tar.zst"
+    ubuntu    = "ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+  }
+}
+
 module "caddy_lxc" {
   source = "../../terraform-modules/proxmox/lxc"
 
@@ -149,7 +158,6 @@ module "bitwarden_lxc" {
   lxc_hostname = "vaultwarden"
   # vm_id        = 114
 
-
   lxc_ostemplate = "debian-13-standard_13.1-2_amd64.tar.zst"
 
   lxc_cores = 1
@@ -177,5 +185,39 @@ module "bitwarden_lxc" {
 
   lxc_tags = [
     "password-manager"
+  ]
+}
+
+module "forgejo_lxc" {
+  source = "../../terraform-modules/proxmox/lxc"
+
+  node_name = "proxmox"
+
+  lxc_hostname   = "forgejo"
+  lxc_ostemplate = local.lxc_templates["debian_13"]
+
+  lxc_cores  = 1
+  lxc_memory = 256
+
+  lxc_password    = var.default_password
+  ssh_public_keys = local.default_ssh_public_key
+
+  lxc_features_nesting = true
+
+  rootfs_storage = {
+    storage = "nvme4tb"
+    size    = "20G"
+  }
+
+  lxc_networks = [
+    {
+      name   = "eth0"
+      bridge = "vmbr0"
+      ip     = "dhcp"
+    }
+  ]
+
+  lxc_tags = [
+    "git"
   ]
 }

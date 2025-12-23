@@ -1,0 +1,13 @@
+{{ forgejo_home }}/log/*.log {
+    weekly
+    missingok
+    rotate 4
+    compress
+    delaycompress
+    notifempty
+    create 640 {{ forgejo_user }} {{ forgejo_group }}
+    sharedscripts
+    postrotate
+        /usr/bin/systemctl kill -s SIGUSR1 forgejo.service
+    endscript
+}
