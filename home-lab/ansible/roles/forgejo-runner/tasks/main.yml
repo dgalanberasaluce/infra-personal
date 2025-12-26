@@ -1,0 +1,49 @@
+- name: Create install directory
+  ansible.builtin.file:
+    path: "{{ install_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose.yml to the server
+  template:
+    src: docker-compose.j2
+    dest: "{{ install_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  no_log: true
+  tags: [config]
+
+- name: Create Docker Volume
+  community.docker.docker_volume:
+    name: "{{ volume_name }}"
+    state: present
+
+- name: Check if runner is already registered
+  ansible.builtin.command:
+    cmd: >
+      docker run --rm 
+      -v {{ volume_name }}:/data 
+      busybox test -f /data/.runner
+  register: runner_is_registered
+  ignore_errors: true
+  changed_when: false
+
+- name: Register Runner
+  when: runner_is_registered.rc != 0
+  ansible.builtin.command:
+    cmd: >
+      docker run --rm 
+      -v {{ volume_name }}:/data 
+      {{ runner_image }} 
+      forgejo-runner register --no-interactive 
+      --instance {{ forgejo_url }} 
+      --token {{ runner_registration_token }} 
+      --name {{ runner_name }} 
+      --labels {{ runner_labels }}
+
+- name: Start Forgejo Runner Service
+  community.docker.docker_compose_v2:
+    project_src: "{{ install_dir }}"
+    state: present
+    pull: always
