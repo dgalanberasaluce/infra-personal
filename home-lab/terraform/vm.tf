@@ -125,3 +125,27 @@ module "windows11" {
 
   vm_tags = ["windows"]
 }
+
+
+module "forgejo_runner" {
+  source = "../../terraform-modules/proxmox/vm"
+
+  proxmox_node = "proxmox"
+
+  vm_name        = "forgejo-runner"
+  vm_description = "Managed by Terraform"
+  vm_tags        = ["ubuntu", "cicd"]
+
+  clone_vm = true
+  clone_vm_target = {
+    vm_id = 901
+    full  = true
+  }
+
+  vm_enable_qemu_agent = true
+
+  vm_cores   = 2
+  vm_sockets = 2
+  vm_memory  = 4096
+  vm_started = true
+}
