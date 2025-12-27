@@ -197,7 +197,7 @@ module "forgejo_lxc" {
   lxc_ostemplate = local.lxc_templates["debian_13"]
 
   lxc_cores  = 1
-  lxc_memory = 256
+  lxc_memory = 512
 
   lxc_password    = var.default_password
   ssh_public_keys = local.default_ssh_public_key

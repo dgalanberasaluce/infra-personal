@@ -1,0 +1,19 @@
+install_dir: "/opt/forgejo-runner"
+
+forgejo_url: "http://localhost:3000"
+    
+# Get this from: Site Admin > Actions > Runners > Create new Runner
+runner_registration_token: "SECURE_TOKEN" 
+    
+# Name of the runner as it appears in UI
+runner_name: "proxmox-ubuntu-01" 
+    
+# Standard labels for default actions
+runner_labels: "ubuntu-latest:docker://node:24,docker:docker://docker:dind"
+    
+# Setup paths
+container_name: "forgejo-runner"
+runner_image: "code.forgejo.org/forgejo/runner:12.3.1"
+forgejo_runner_version: "12.3.1"
+
+volume_name: "forgejo-runner-data"

@@ -1,0 +1,25 @@
+- name: Check if the host is a virtual machine
+  ansible.builtin.fail:
+    msg: "This host is not detected as a virtual machine guest. Skipping QEMU agent setup."
+  when: 
+    - qemu_agent_check_virtualization | bool
+    - ansible_facts["virtualization_role"] != 'guest'
+
+- name: Update Apt cache (Debian/Ubuntu only)
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_facts["os_family"] == "Debian"
+
+- name: Install QEMU Guest Agent package
+  ansible.builtin.package:
+    name: "{{ qemu_agent_package }}"
+    state: present
+
+- name: Ensure QEMU Guest Agent service is configured
+  ansible.builtin.service:
+    name: "{{ qemu_agent_service }}"
+    state: "{{ qemu_agent_service_state }}"
+    enabled: "{{ qemu_agent_service_enabled }}"
+  # Ignore errors if the socket is not present yet (common in fresh cloud-init runs)
+  ignore_errors: yes

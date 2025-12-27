@@ -1,0 +1,12 @@
+# Package name (usually generic across major distros)
+qemu_agent_package: qemu-guest-agent
+
+# Service name
+qemu_agent_service: qemu-guest-agent
+
+# Service state configuration
+qemu_agent_service_state: started
+qemu_agent_service_enabled: true
+
+# Option to skip installation if not running on a VM
+qemu_agent_check_virtualization: true
