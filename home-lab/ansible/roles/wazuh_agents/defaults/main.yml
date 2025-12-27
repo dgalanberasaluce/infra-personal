@@ -1,0 +1,12 @@
+#############################
+# REQUIRED VARIABLES
+#############################
+
+# Wazuh manager server IP/fdqn 
+wazuh_manager_ip: "192.168.1.100"  
+
+#############################
+# OPTIONAL VARIABLES
+#############################
+# Group agents in the dashboard
+# wazuh_agent_group: "proxmox_nodes" 
