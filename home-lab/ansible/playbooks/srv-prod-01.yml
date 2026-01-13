@@ -1,0 +1,27 @@
+- hosts: srv_prod 
+  become: true
+  roles:
+    - qemu_agent
+    - docker_install
+    - { role: tools_stack, tags: app }
+    - { role: paperless_ngx, tags: paperless}
+
+  vars:
+    # Tools Stack
+    version_it_tools: latest
+    version_cyberchef: latest
+    version_drawio: latest
+    version_excalidraw: latest
+    version_bentopdf: latest
+    version_plantuml: latest
+    version_mermaid: latest
+    version_convertx: latest
+    version_omni_tools: latest
+
+- hosts: srv_prod_01 
+  become: true
+  roles:
+    - monitoring_stack 
+  tags: monitoring
+  vars:
+    monitoring_role: "server"
