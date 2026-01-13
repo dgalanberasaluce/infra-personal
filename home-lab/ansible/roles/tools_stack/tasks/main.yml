@@ -1,0 +1,40 @@
+# Generate docker-compose locally
+- name: Ensure local directory exists for generated compose
+  file:
+    path: "generated/{{ inventory_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+
+- name: Render docker-compose.yml locally
+  template:
+    src: docker-compose.yml.j2
+    dest: "generated/{{ inventory_hostname }}/docker-compose-{{role_name}}.yml"
+  delegate_to: localhost
+  become: false
+
+# Remote host
+- name: Ensure application directory exists
+  ansible.builtin.file:
+    path: "{{ stack_install_dir }}"
+    state: directory
+    owner: "{{ stack_user }}"
+    group: "{{ stack_group }}"
+    mode: '0755'
+
+- name: Template docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ stack_install_dir }}/docker-compose.yml"
+    owner: "{{ stack_user }}"
+    group: "{{ stack_group }}"
+    mode: '0640'
+  notify: Restart Docker Stack
+
+- name: Ensure Docker Compose is up and running
+  community.docker.docker_compose_v2:
+    project_src: "{{ stack_install_dir }}"
+    state: present
+    pull: missing
+    remove_orphans: true

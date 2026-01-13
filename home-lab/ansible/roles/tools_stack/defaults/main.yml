@@ -1,0 +1,29 @@
+# General Deployment Config
+stack_install_dir: "/opt/tools_stack"
+stack_user: "root"
+stack_group: "root"
+
+# versions (Pinning for security)
+version_it_tools: "2024.5.13-7467652"
+version_cyberchef: "v10.19.2"
+version_drawio: "24.4.13"
+version_excalidraw: "latest"
+version_bentopdf: "latest"
+version_plantuml: "jetty-v1.2024.5"
+version_mermaid: "v10.8.0"
+version_convertx: "v0.15.1"
+version_omni_tools: "latest"
+
+# Ports
+port_it_tools: "8080"
+port_cyberchef: "8081"
+port_diagrams: "8082"
+port_excalidraw: "8083"
+port_bentopdf: "8084"
+port_plantuml: "8085"
+port_mermaid: "8086"
+port_convertx: "8087"
+port_omni_tools: "8088"
+
+# Secret (Leave empty to auto-generate on first run)
+convertx_jwt_secret: ""

@@ -1,0 +1,94 @@
+x-common-security: &common-security
+  restart: unless-stopped
+
+services:
+
+  it-tools:
+    <<: [*common-security]
+    image: corentinth/it-tools:{{ version_it_tools }}
+    container_name: it-tools
+    ports:
+      - "{{ port_it_tools }}:80"
+
+  cyberchef:
+    <<: [*common-security]
+    image: ghcr.io/gchq/cyberchef:{{ version_cyberchef }}
+    container_name: cyberchef
+    ports:
+      - "{{ port_cyberchef }}:80"
+    volumes:
+      - cyberchef-data:/var/lib/cyberchef:rw
+
+  diagrams:
+    <<: [*common-security]
+    image: jgraph/drawio:{{ version_drawio }}
+    container_name: diagrams
+    ports:
+      - "{{ port_diagrams }}:8080"
+    environment:
+      - DRAWIO_BASE_URL=/draw
+      - DRAWIO_LIGHTBOX_URL=
+    tmpfs:
+      - /tmp
+      - /run/jetty
+
+  excalidraw:
+    <<: [*common-security]
+    image: excalidraw/excalidraw:{{ version_excalidraw }}
+    container_name: excalidraw
+    ports:
+      - "{{ port_excalidraw }}:80"
+
+  bentopdf-simple:
+    <<: [*common-security]
+    image: bentopdf/bentopdf-simple:{{ version_bentopdf }}
+    container_name: bentopdf
+    ports:
+      - "{{ port_bentopdf }}:8080"
+
+  plantuml:
+    <<: [*common-security]
+    image: plantuml/plantuml-server:{{ version_plantuml }}
+    container_name: plantuml
+    ports:
+      - "{{ port_plantuml }}:8080"
+    tmpfs:
+      - /tmp
+      - /var/run/jetty
+
+  mermaid:
+    <<: [*common-security]
+    image: ghcr.io/mermaid-js/mermaid-live-editor:{{ version_mermaid }}
+    container_name: mermaid
+    ports:
+      - "{{ port_mermaid }}:8080"
+
+  convertx:
+    <<: [*common-security]
+    image: ghcr.io/c4illin/convertx:{{ version_convertx }}
+    container_name: convertx
+    ports:
+      - "{{ port_convertx }}:3000"
+    environment:
+      - ACCOUNT_REGISTRATION=true
+      - HTTP_ALLOWED=true
+      - ALLOW_UNAUTHENTICATED=false
+      - LANGUAGE=en
+    #  - JWT_SECRET=${CONVERTX_JWT_SECRET}
+    volumes:
+      - convertx-data:/app/data:rw
+
+  omni-tools:
+    <<: [*common-security]
+    image: iib0011/omni-tools:{{ version_omni_tools }}
+    container_name: omni-tools
+    restart: unless-stopped
+    ports:
+      - "{{ port_omni_tools }}:80"
+
+volumes:
+  convertx-data:
+  cyberchef-data:
+
+networks:
+  frontend:
