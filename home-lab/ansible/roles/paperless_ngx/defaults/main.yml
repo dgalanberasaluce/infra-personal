@@ -1,0 +1,20 @@
+paperless_dir: /opt/paperless
+
+paperless_version: latest
+
+paperless_web_port: 8000
+
+paperless_secret_key: "changeme"
+
+paperless_time_zone: UTC
+
+paperless_admin_user: admin
+paperless_admin_password: admin
+paperless_admin_email: admin@example.com
+
+paperless_db_name: paperless
+paperless_db_user: paperless
+paperless_db_password: paperless
+paperless_db_port: 5432
+
+paperless_redis_port: 6379
