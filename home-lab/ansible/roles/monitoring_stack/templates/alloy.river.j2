@@ -1,0 +1,75 @@
+prometheus.exporter.unix "host" {
+  procfs_path = "/host/proc"
+  sysfs_path  = "/host/sys"
+  rootfs_path = "/host/root"
+  
+  // Optional: Disable noise collectors
+  disable_collectors = ["ipvs", "btrfs", "infiniband"]
+}
+
+prometheus.scrape "linux_host" {
+  targets    = prometheus.exporter.unix.host.targets
+  forward_to = [prometheus.remote_write.victoriametrics.receiver]
+}
+
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "docker_labels" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/?(.*)" // Quita la barra inicial si existe
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_image"]
+    target_label  = "image"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "compose_service"
+  }
+}
+
+// Logs collector
+loki.source.docker "docker_logs" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.docker_labels.output
+  forward_to = [loki.write.loki.receiver] 
+}
+
+// outputs
+{% if monitoring_role == 'server' %}
+  {% set vm_target = "http://victoriametrics:8428/api/v1/write" %}
+  {% set loki_target = "http://loki:3100/loki/api/v1/push" %}
+{% else %}
+  {% set vm_target = "http://" ~ monitoring_hub_ip ~ ":8428/api/v1/write" %}
+  {% set loki_target = "http://" ~ monitoring_hub_ip ~ ":3100/loki/api/v1/push" %}
+{% endif %}
+
+prometheus.remote_write "victoriametrics" {
+  endpoint {
+    url = "{{ vm_target }}"
+  }
+  
+  external_labels = {
+    instance = "{{ inventory_hostname }}",
+    role     = "{{ monitoring_role }}",
+  }
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "{{ loki_target }}"
+  }
+  
+  external_labels = {
+    instance = "{{ inventory_hostname }}",
+    role     = "{{ monitoring_role }}",
+  }
+}

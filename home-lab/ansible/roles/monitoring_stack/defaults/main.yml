@@ -1,0 +1,21 @@
+# --- Global configuration ---
+monitoring_base_dir: "/opt/monitoring"
+monitoring_data_dir: "{{ monitoring_base_dir }}/data"
+monitoring_config_dir: "{{ monitoring_base_dir }}/config"
+
+# --- Node role: 'server' or 'agent'
+monitoring_role: "agent" 
+
+# --- Agent configuration ---
+# if monitoring_role == "server" it should use 127.0.0.1
+# if monitoring_role == "agent", it should use the IP of the server
+monitoring_hub_ip: "127.0.0.1" 
+
+# --- Images ---
+version_alloy: "v1.12.2"
+version_victoriametrics: "v1.133.0-scratch"
+version_loki: "3.6"
+version_grafana: "12.3.1"
+
+# --- Security ---
+grafana_admin_password: "change_me" # Use Ansible Vault

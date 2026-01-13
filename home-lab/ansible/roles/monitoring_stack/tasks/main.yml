@@ -1,0 +1,102 @@
+# Generate docker-compose locally
+- name: Ensure local directory exists for generated compose
+  file:
+    path: "generated/{{ inventory_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+
+- name: Render docker-compose.yml locally
+  template:
+    src: docker-compose.yml.j2
+    dest: "generated/{{ inventory_hostname }}/docker-compose-{{role_name}}.yml"
+  delegate_to: localhost
+  become: false
+
+# Remote host
+- name: Ensure Python dependencies for Docker are installed
+  ansible.builtin.apt:
+    name:
+      - python3-docker
+      - docker-compose-plugin
+    state: present
+    update_cache: yes
+  when: ansible_facts["os_family"] == "Debian"
+
+- name: Create common directory structure (Alloy)
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    recurse: yes
+  loop:
+    - "{{ monitoring_config_dir }}/alloy"
+    - "{{ monitoring_data_dir }}/alloy"
+
+- name: Create server-only directory structure (Backend)
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    recurse: yes
+  when: monitoring_role == 'server'
+  loop:
+    - "{{ monitoring_config_dir }}/loki"
+    - "{{ monitoring_data_dir }}/vm"
+    - "{{ monitoring_data_dir }}/loki"
+    - "{{ monitoring_data_dir }}/grafana"
+
+- name: Configure specific permissions for Loki (UID 10001)
+  ansible.builtin.file:
+    path: "{{ monitoring_data_dir }}/loki"
+    state: directory
+    owner: 10001
+    group: 10001
+    mode: '0750'
+  when: monitoring_role == 'server'
+
+- name: Deploy Loki configuration
+  ansible.builtin.template:
+    src: loki-config.yaml.j2
+    dest: "{{ monitoring_config_dir }}/loki/loki-config.yaml"
+    mode: '0644'
+  when: monitoring_role == 'server'
+  notify: Restart Monitoring Stack
+
+- name: Create configuration directory for Grafana Provisioning
+  ansible.builtin.file:
+    path: "{{ monitoring_config_dir }}/grafana/provisioning/datasources"
+    state: directory
+    mode: '0755'
+    recurse: yes
+  when: monitoring_role == 'server'
+
+- name: Deploy Grafana datasource configuration
+  ansible.builtin.template:
+    src: grafana_datasources.yaml.j2
+    dest: "{{ monitoring_config_dir }}/grafana/provisioning/datasources/datasources.yaml"
+    mode: '0644'
+  when: monitoring_role == 'server'
+  notify: Restart Monitoring Stack
+
+- name: Deploy Alloy configuration (River)
+  ansible.builtin.template:
+    src: alloy.river.j2
+    dest: "{{ monitoring_config_dir }}/alloy/config.river"
+    mode: '0644'
+  notify: Restart Monitoring Stack
+
+- name: Deploy Docker Compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ monitoring_base_dir }}/docker-compose.yml"
+    mode: '0640'
+  notify: Restart Monitoring Stack
+
+- name: Start the Monitoring Stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ monitoring_base_dir }}"
+    state: present
+    pull: always
+    remove_orphans: true

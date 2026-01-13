@@ -1,0 +1,115 @@
+services:
+
+  # ---------------------------------------------------------
+  # TSDB
+  # ---------------------------------------------------------
+{% if monitoring_role == 'server' %}
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:{{version_victoriametrics}}
+    container_name: victoriametrics
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - vm_data:/storage
+    ports:
+      - "8428:8428"
+    command:
+      - "-storageDataPath=/storage"
+      - "-retentionPeriod=1y" # Default is 1 month
+      - "-httpListenAddr=:8428"
+    networks:
+      - monitoring
+{% endif %}
+
+  # ---------------------------------------------------------
+  # LOGS
+  # ---------------------------------------------------------
+{% if monitoring_role == 'server' %}
+  loki:
+    image: grafana/loki:{{version_loki}}
+    container_name: loki
+    restart: unless-stopped
+    volumes:
+      - ./config/loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+    - monitoring
+{% endif %}
+
+  # ---------------------------------------------------------
+  # Data Visualization
+  # ---------------------------------------------------------
+{% if monitoring_role == 'server' %}
+  grafana:
+    image: grafana/grafana:{{version_grafana}}
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - {{ monitoring_config_dir }}/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD={{ grafana_admin_password }}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    depends_on:
+      - victoriametrics
+      - loki
+    networks:
+      - monitoring
+{% endif %}
+
+
+  # ---------------------------------------------------------
+  # Data Agent
+  # ---------------------------------------------------------
+  alloy:
+    image: grafana/alloy:{{ version_alloy }}
+    container_name: alloy
+    restart: unless-stopped
+    # Requires privileges to get logs and metrics from host
+    privileged: true
+    pid: host
+    volumes:
+      # Configuration
+      - {{ monitoring_config_dir }}/alloy/config.river:/etc/alloy/config.river
+      # Persistent data (WAL)
+      - {{ monitoring_config_dir }}/alloy:/var/lib/alloy/data
+      # Docker access (to find out containers)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Host access
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro
+      # Acceso a logs del sistema y contenedores
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.river
+    ports:
+      - "12345:12345" # Debug UI
+    {% if monitoring_role == 'server' -%}
+    depends_on:
+      - victoriametrics
+      - loki
+    networks:
+      - monitoring
+    {% endif %}
+
+
+networks:
+  monitoring:
+    driver: bridge
+
+{% if monitoring_role == 'server' %}
+volumes:
+  grafana_data: {}
+  vm_data: {}
+  loki_data: {}
+{% endif %}
