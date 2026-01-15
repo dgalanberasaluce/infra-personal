@@ -1,0 +1,18 @@
+# Docker versions
+authentik_version: "2025.10.3"
+postgres_version: "16-alpine"
+
+# Authentik Ports
+authentik_port_http: 9000
+authentik_port_https: 9443
+
+# Set up directory
+authentik_base_dir: "/opt/authentik"
+
+# Generate with: openssl rand -base64 32
+authentik_secret_key: "CHANGE_ME"
+authentik_pg_pass: "CHANGE_ME"
+
+# Cloudflare Tunnel
+enable_cloudflare_tunnel: false
+cloudflare_tunnel_token: ""
