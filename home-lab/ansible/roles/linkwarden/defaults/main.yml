@@ -1,0 +1,9 @@
+likwarden_version: latest
+postgres_version: 16-alpine
+meilisearch_version: v1.12.8
+
+install_dir: "/opt/linkwarden"
+stack_user: "root"
+stack_group: "root"
+
+build_from_source: false
