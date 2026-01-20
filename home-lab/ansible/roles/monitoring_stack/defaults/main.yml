@@ -10,12 +10,22 @@ monitoring_role: "agent"
 # if monitoring_role == "server" it should use 127.0.0.1
 # if monitoring_role == "agent", it should use the IP of the server
 monitoring_hub_ip: "127.0.0.1" 
+monitor_docker: false
+agent_hostname: "{{ ansible_facts[\"hostname\"] }}"
 
 # --- Images ---
 version_alloy: "v1.12.2"
 version_victoriametrics: "v1.133.0-scratch"
 version_loki: "3.6"
 version_grafana: "12.3.1"
+version_pve_exporter: "3.8.0"
 
 # --- Security ---
 grafana_admin_password: "change_me" # Use Ansible Vault
+
+# Proxmox Exporter (Create user/api token on proxmox)
+pve_exporter_user: "metrics@pve"
+pve_exporter_token_name: "pve-exporter"
+pve_exporter_token_value: "change_me"
+pve_verify_ssl: false
+proxmox_server_ip: "127.0.0.1"

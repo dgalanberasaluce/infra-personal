@@ -80,12 +80,18 @@
   when: monitoring_role == 'server'
   notify: Restart Monitoring Stack
 
-- name: Deploy Alloy configuration (River)
+- name: Deploy Alloy configuration
   ansible.builtin.template:
-    src: alloy.river.j2
-    dest: "{{ monitoring_config_dir }}/alloy/config.river"
+    src: config.alloy.j2
+    dest: "{{ monitoring_config_dir }}/alloy/config.alloy"
     mode: '0644'
   notify: Restart Monitoring Stack
+
+- name: Deploy .env file
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "{{ monitoring_base_dir }}/.env"
+    mode: '0600'
 
 - name: Deploy Docker Compose file
   ansible.builtin.template:
