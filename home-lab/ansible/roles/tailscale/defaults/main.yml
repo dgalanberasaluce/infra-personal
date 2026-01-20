@@ -1,0 +1,15 @@
+# Authentication key (set up using ansible-vault. Get it from login.tailscale.com)
+tailscale_auth_key: ""
+
+# subnets
+tailscale_advertise_routes: ""
+
+# Additional arguments (e.g: --ssh, --hostname=mi-server)
+tailscale_extra_args: "--accept-routes"
+
+# State of the package: present (install) vs latest (always update)
+tailscale_package_state: present
+
+# DON'T CHANGE - dynamic varuables to get OS info
+ts_distro: "{{ ansible_facts['distribution'] | lower }}"
+ts_release: "{{ ansible_facts['distribution_release'] }}"

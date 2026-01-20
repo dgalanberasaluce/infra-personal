@@ -221,3 +221,33 @@ module "forgejo_lxc" {
     "git"
   ]
 }
+
+module "tailscale_lxc" {
+  source = "../../terraform-modules/proxmox/lxc"
+
+  node_name    = "proxmox"
+  lxc_hostname = "tailscale"
+
+  lxc_ostemplate = local.lxc_templates["debian_12"]
+
+  lxc_cores  = 1
+  lxc_memory = 512
+
+  lxc_password    = var.default_password
+  ssh_public_keys = local.default_ssh_public_key
+
+  lxc_features_nesting = true
+
+  rootfs_storage = {
+    storage = "nvme4tb"
+    size    = "10G"
+  }
+
+  lxc_networks = [
+    {
+      name   = "eth0"
+      bridge = "vmbr0"
+      ip     = "dhcp"
+    }
+  ]
+}

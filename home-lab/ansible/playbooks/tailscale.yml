@@ -1,0 +1,11 @@
+- name: Setup Tailscale
+  hosts: 
+  - tailscale
+  become: true
+  roles:
+    - role: tailscale
+      vars:
+        tailscale_auth_key: "{{ vault_tailscale_key }}"
+        tailscale_advertise_routes: "192.168.8.0/24"
+        # Optional: Force Update
+        # tailscale_package_state: latest

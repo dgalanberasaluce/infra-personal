@@ -1,0 +1,88 @@
+# ==============================================================================
+# 1. Set up
+# ==============================================================================
+- name: Install dependencies
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gpg
+      - apt-transport-https
+      - ca-certificates
+    state: present
+    update_cache: yes
+  tags: [installation, updates]
+
+- name: Create directory for keyrings
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  tags: [installation]
+
+- name: Download Tailscale GPG Key
+  ansible.builtin.get_url:
+    url: "https://pkgs.tailscale.com/stable/{{ ts_distro }}/{{ ts_release }}.noarmor.gpg"
+    dest: /etc/apt/keyrings/tailscale-archive-keyring.gpg
+    mode: '0644'
+  tags: [installation]
+
+- name: Add Tailscale repository to sources.list.d
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/{{ ts_distro }} {{ ts_release }} main"
+    filename: tailscale
+    state: present
+    update_cache: yes
+  tags: [installation]
+
+- name: Install tailscale package
+  ansible.builtin.apt:
+    name: tailscale
+    state: "{{ tailscale_package_state }}"
+    update_cache: yes
+  notify: Restart tailscale
+  tags: [installation, updates]
+
+# ==============================================================================
+# 2. Configuration
+# ==============================================================================
+- name: Enable IP Forwarding IPv4 (required)
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+  tags: [configuration]
+
+- name: Enable IP Forwarding IPv6
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+  tags: [configuration]
+
+# ==============================================================================
+# 3. Authentication
+# ==============================================================================
+- name: Check Tailscale state
+  ansible.builtin.command: tailscale status
+  register: tailscale_status
+  changed_when: false
+  failed_when: false
+  tags: [configuration]
+
+- name: Set up Tailscale (Auth & Advertise)
+  ansible.builtin.command: >
+    tailscale up 
+    --authkey={{ tailscale_auth_key }} 
+    {% if tailscale_advertise_routes | length > 0 %}
+    --advertise-routes={{ tailscale_advertise_routes }}
+    {% endif %}
+    {{ tailscale_extra_args }}
+  when: 
+    - tailscale_auth_key | length > 0
+    - "'Logged out' in tailscale_status.stdout or tailscale_status.rc != 0"
+  no_log: true
+  tags: [configuration]
