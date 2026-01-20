@@ -1,17 +1,17 @@
-x-common-security: &common-security
+x-common: &common
   restart: unless-stopped
 
 services:
 
   it-tools:
-    <<: [*common-security]
+    <<: [*common]
     image: corentinth/it-tools:{{ version_it_tools }}
     container_name: it-tools
     ports:
       - "{{ port_it_tools }}:80"
 
   cyberchef:
-    <<: [*common-security]
+    <<: [*common]
     image: ghcr.io/gchq/cyberchef:{{ version_cyberchef }}
     container_name: cyberchef
     ports:
@@ -20,7 +20,7 @@ services:
       - cyberchef-data:/var/lib/cyberchef:rw
 
   diagrams:
-    <<: [*common-security]
+    <<: [*common]
     image: jgraph/drawio:{{ version_drawio }}
     container_name: diagrams
     ports:
@@ -33,21 +33,21 @@ services:
       - /run/jetty
 
   excalidraw:
-    <<: [*common-security]
+    <<: [*common]
     image: excalidraw/excalidraw:{{ version_excalidraw }}
     container_name: excalidraw
     ports:
       - "{{ port_excalidraw }}:80"
 
   bentopdf-simple:
-    <<: [*common-security]
+    <<: [*common]
     image: bentopdf/bentopdf-simple:{{ version_bentopdf }}
     container_name: bentopdf
     ports:
       - "{{ port_bentopdf }}:8080"
 
   plantuml:
-    <<: [*common-security]
+    <<: [*common]
     image: plantuml/plantuml-server:{{ version_plantuml }}
     container_name: plantuml
     ports:
@@ -57,14 +57,14 @@ services:
       - /var/run/jetty
 
   mermaid:
-    <<: [*common-security]
+    <<: [*common]
     image: ghcr.io/mermaid-js/mermaid-live-editor:{{ version_mermaid }}
     container_name: mermaid
     ports:
       - "{{ port_mermaid }}:8080"
 
   convertx:
-    <<: [*common-security]
+    <<: [*common]
     image: ghcr.io/c4illin/convertx:{{ version_convertx }}
     container_name: convertx
     ports:
@@ -79,16 +79,129 @@ services:
       - convertx-data:/app/data:rw
 
   omni-tools:
-    <<: [*common-security]
+    <<: [*common]
     image: iib0011/omni-tools:{{ version_omni_tools }}
     container_name: omni-tools
-    restart: unless-stopped
     ports:
       - "{{ port_omni_tools }}:80"
+  
+  bytestash:
+    <<: [*common]
+    image: "ghcr.io/jordan-dalby/bytestash:{{ version_bytestash }}"
+    volumes:
+      - {{ stack_install_dir }}/{{ bytestash_data_dir }}:/data/snippets
+    ports:
+      - "{{ port_bytestash }}:5000"
+    environment:
+      #ALLOWED_HOSTS: ${BYTESTASH_ALLOWED_HOSTS}
+      BASE_PATH: ${BYTESTASH_BASE_PATH}
+      JWT_SECRET: ${BYTESTASH_JWT_SECRET}
+      TOKEN_EXPIRY: ${BYTESTASH_TOKEN_EXPIRY}
+      ALLOW_NEW_ACCOUNTS: ${BYTESTASH_ALLOW_NEW_ACCOUNTS}
+      DEBUG: ${BYTESTASH_DEBUG}
+      DISABLE_ACCOUNTS: ${BYTESTASH_DISABLE_ACCOUNTS}
+      DISABLE_INTERNAL_ACCOUNTS: ${BYTESTASH_DISABLE_INTERNAL_ACCOUNTS}
+
+      # See https://github.com/jordan-dalby/ByteStash/wiki/Single-Sign%E2%80%90on-Setup for more info
+      OIDC_ENABLED: ${BYTESTASH_OIDC_ENABLED}
+      OIDC_DISPLAY_NAME: ${BYTESTASH_OIDC_DISPLAY_NAME:-""}
+      OIDC_ISSUER_URL: ${BYTESTASH_OIDC_ISSUER_URL:-""}
+      OIDC_CLIENT_ID: ${BYTESTASH_OIDC_CLIENT_ID:-""}
+      OIDC_CLIENT_SECRET: ${BYTESTASH_OIDC_CLIENT_SECRET:-""}
+      OIDC_SCOPES: ${BYTESTASH_OIDC_SCOPES:-""}
+
+  memos:
+    <<: [*common]
+    image: neosmemo/memos:{{ version_memos }}
+    volumes:
+      - {{ stack_install_dir }}/{{ memos_data_dir }}:/var/opt/memos
+    ports:
+      - "{{ port_memos }}:5230"
+
+#  freshrss:
+#    <<: [*common]
+#    image: freshrss/freshrss:{{ version_freshrss }}
+#    container_name: freshrss
+#    logging:
+#      options:
+#        max-size: 10m
+#    ports:
+#      - "{{ port_freshrss }}:80"
+#    volumes:
+#      - freshrss-data:/var/www/FreshRSS/data
+#      - {{ stack_install_dir }}/{{ memos_extensions_dir }}:/var/www/FreshRSS/extensions
+#    environment:
+#      TZ: Europe/Paris
+#      CRON_MIN: '3,33'
+#      TRUSTED_PROXY: ${FRESHRSS_TRUSTED_PROXY}
+
+  init-booklore:
+    image: busybox
+    command: sh -c "chown -R ${BOOKLORE_APP_USER_ID}:${BOOKLORE_APP_GROUP_ID} /app/data"
+    volumes:
+      - booklore-data:/app/data
+
+  booklore:
+    <<: [*common]
+    image: ghcr.io/booklore-app/booklore:{{ version_booklore }}
+    container_name: booklore
+    environment:
+      - USER_ID=${BOOKLORE_APP_USER_ID}
+      - GROUP_ID=${BOOKLORE_APP_GROUP_ID}
+      - TZ=${BOOKLORE_TZ}
+      - DATABASE_URL=jdbc:mariadb://booklore_mariadb:3306/${BOOKLORE_MYSQL_DATABASE}
+      - DATABASE_USERNAME=${BOOKLORE_DB_USER}
+      - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
+      - BOOKLORE_PORT=${BOOKLORE_PORT}
+    depends_on:
+      init-booklore:
+        condition: service_completed_successfully
+      booklore_mariadb:
+        condition: service_healthy
+    ports:
+      - "{{ port_booklore }}:${BOOKLORE_PORT}"
+    volumes:
+      - booklore-data:/app/data
+      - "{{ stack_install_dir }}/{{ booklore_dir }}/books:/books"
+      - "{{ stack_install_dir }}/{{ booklore_dir }}/bookdrop:/bookdrop"
+    networks:
+      - booklore_network
+    healthcheck:
+      test: wget -q -O - http://localhost:${BOOKLORE_PORT}/api/v1/healthcheck
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+
+  booklore_mariadb:
+    image: lscr.io/linuxserver/mariadb:{{ version_booklore_mariadb }}
+    container_name: booklore_mariadb
+    environment:
+      - PUID=${BOOKLORE_DB_USER_ID}
+      - PGID=${BOOKLORE_DB_GROUP_ID}
+      - TZ=${BOOKLORE_TZ}
+      - MYSQL_ROOT_PASSWORD=${BOOKLORE_MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${BOOKLORE_MYSQL_DATABASE}
+      - MYSQL_USER=${BOOKLORE_DB_USER}
+      - MYSQL_PASSWORD=${BOOKLORE_DB_PASSWORD}
+    volumes:
+      - booklore-mariadb:/config
+    restart: unless-stopped
+    networks:
+      - booklore_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   convertx-data:
   cyberchef-data:
+  freshrss-data:
+  booklore-data:
+  booklore-mariadb:
 
 networks:
-  frontend:
+  booklore_network:
+    driver: bridge
