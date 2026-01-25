@@ -1,0 +1,139 @@
+---
+- name: System maintenance and Package auditing
+  hosts: all
+  become: true
+  serial: 3 # Process 3 hosts at a time
+  gather_facts: true # Required to get date/time for log naming
+  vars:
+    log_file: "/var/log/ansible-updates/updates.log"
+    # Date format (ISO8601)
+    current_time: "{{ lookup('pipe', 'date +%Y-%m-%dT%H:%M:%S%z') }}"
+    # Toggle to allow automatic reboots
+    allow_reboot: false
+    write_to_file: true
+
+  tasks:
+    - name: Ensure log directory exists
+      ansible.builtin.file:
+        path: "{{ log_file | dirname }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      when: write_to_file | bool
+      tags: [always, setup]
+
+    # -------------------------------------------------------
+    # DEBIAN / UBUNTU (APT)
+    # -------------------------------------------------------
+    - name: Handle Debian/Ubuntu updates
+      when: ansible_facts["os_family"] == "Debian"
+      tags: [debian]
+      block:
+        - name: Update repository cache (Debian)
+          ansible.builtin.apt:
+            update_cache: true
+            cache_valid_time: 3600
+          tags: [audit, update]
+
+        - name: Simulate upgrade to capture version diffs (Debian)
+          # -s: Simulate/Dry Run
+          # -V: Verbose (Shows version numbers like: 1.2.3 => 1.2.4)
+          shell: |
+            # e.g: vim (2:8.1) < (2:8.2)
+            apt-get dist-upgrade -s -V | \
+            grep " => " | \
+            sed -r 's/^[[:space:]]*//' | \
+            sed -r 's/ \((.*) => (.*)\)/ (\1) < (\2)/'
+          register: apt_formatted
+          changed_when: false
+          tags: [audit]
+
+        - name: "AUDIT RESULT: Packages to be updated (Debian)"
+          ansible.builtin.debug:
+            msg: "{{ apt_formatted.stdout_lines }}"
+          when: 
+            - apt_formatted.stdout_lines | length > 0
+            - not write_to_file | bool
+          tags: [audit]
+        
+        - name: Write Version Changes to Log (Debian)
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            create: true
+            line: "[{{ current_time }}] package={{ item }}"
+            insertafter: EOF
+          loop: "{{ apt_formatted.stdout_lines }}"
+          when:
+            - write_to_file | bool
+            - apt_formatted.stdout_lines | length > 0
+          tags: [logging]
+
+        - name: Apply upgrade (Debian)
+          ansible.builtin.apt:
+            upgrade: dist
+            autoremove: true
+          register: apt_result
+          tags: [update]
+
+    # -------------------------------------------------------
+    # RHEL / ROCKY / FEDORA (DNF)
+    # -------------------------------------------------------
+    - name: Handle RHEL updates
+      when: ansible_facts["os_family"] == "RedHat"
+      tags: [rhel]
+      block:
+        - name: Update repository (RHEL)
+          shell: |
+            dnf check-update | awk '/^[a-zA-Z]/ { print $1 " (?) < (" $2 ")" }'
+          register: dnf_formatted
+          # DNF returns 100 if there are updates, 0 otherwise, 1 if error.
+          failed_when: dnf_formatted.rc not in [0, 100]
+          changed_when: false
+          tags: [audit]
+
+        - name: Write Version Changes to Log (RHEL)
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            create: yes
+            line: "[{{ current_time }}] package={{ item }}"
+            insertafter: EOF
+          loop: "{{ dnf_formatted.stdout_lines }}"
+          when: 
+            - dnf_formatted.stdout_lines | length > 0
+          tags: [audit, logging]
+
+        - name: Upgrade all packages (RHEL)
+          ansible.builtin.dnf:
+            name: "*"
+            state: latest
+            exclude: "kernel*" # Optional
+          register: dnf_result
+          tags: [update]
+
+    # -------------------------------------------------------
+    # Restart server
+    # -------------------------------------------------------
+    - name: Check for reboot requirement
+      tags: [reboot]
+      block:
+        - name: Check Debian reboot flag
+          ansible.builtin.stat:
+            path: /var/run/reboot-required
+          register: deb_reboot
+          when: ansible_facts["os_family"] == "Debian"
+
+        - name: Check RHEL reboot flag
+          ansible.builtin.command: needs-restarting -r
+          register: rhel_reboot
+          failed_when: false
+          changed_when: false
+          when: ansible_facts["os_family"] == "RedHat"
+
+        - name: Restart server if required
+          ansible.builtin.reboot:
+            msg: "Rebooting for system updates [Ansible]"
+            pre_reboot_delay: 10
+          when:
+            - allow_reboot
+            - (deb_reboot.stat.exists | default(false)) or (rhel_reboot.rc is defined and rhel_reboot.rc == 1)
