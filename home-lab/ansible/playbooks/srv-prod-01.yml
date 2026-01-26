@@ -35,9 +35,11 @@
       version_omni_tools: latest
       version_booklore: "v1.17.0"
       version_booklore_mariadb: "11.4.8"
+      verison_jotty: "1.19.1"
       bytestash_jwt_secret: "{{ vault_bytestash_jwt_secret }}"
       booklore_db_root_password: "{{ vault_booklore_db_root_password}}"
       booklore_db_password: "{{ vault_booklore_db_password }}"
+      
   - name: Set up monitoring_stack
     import_role:
       name: monitoring_stack 
