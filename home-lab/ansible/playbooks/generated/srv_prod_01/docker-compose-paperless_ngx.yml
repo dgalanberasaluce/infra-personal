@@ -1,0 +1,49 @@
+services:
+  broker:
+    image: redis:7
+    container_name: paperless-redis
+    restart: unless-stopped
+    volumes:
+      - /opt/paperless/redis:/data
+
+  db:
+    image: postgres:15
+    container_name: paperless-db
+    restart: unless-stopped
+    volumes:
+      - /opt/paperless/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless-web
+    restart: unless-stopped
+    depends_on:
+      - db
+      - broker
+    ports:
+      - "8000:8000"
+    volumes:
+      - /opt/paperless/data:/usr/src/paperless/data
+      - /opt/paperless/media:/usr/src/paperless/media
+      - /opt/paperless/export:/usr/src/paperless/export
+      - /opt/paperless/consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBNAME: paperless
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: paperless
+
+      PAPERLESS_SECRET_KEY: changeme
+      PAPERLESS_TIME_ZONE: UTC
+
+      PAPERLESS_ADMIN_USER: admin
+      PAPERLESS_ADMIN_PASSWORD: admin
+      PAPERLESS_ADMIN_MAIL: admin@example.com
+
+      PAPERLESS_ALLOWED_HOSTS: "paperless.local,192.168.8.100"
+      PAPERLESS_URL: "https://paperless.local"

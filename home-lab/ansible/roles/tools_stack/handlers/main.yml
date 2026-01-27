@@ -1,0 +1,8 @@
+- name: Restart Docker Stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ stack_install_dir }}"
+    state: present
+    # force-recreate is necessary to pick up changes in the .env file
+    # if the docker-compose.yml itself hasn't changed.
+    recreate: always
+    remove_orphans: true

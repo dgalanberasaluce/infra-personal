@@ -1,0 +1,38 @@
+services:
+  
+  postgres:
+    image: postgres:{{ postgres_version }}
+    env_file: .env
+    restart: always
+    volumes:
+      - database:/var/lib/postgresql/data
+
+  linkwarden:
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+    restart: always
+{% if build_from_source %}
+    build: . # uncomment to build from source
+{% else %}
+    image: ghcr.io/linkwarden/linkwarden:{{ likwarden_version }} # comment to build from source
+{% endif %}
+    ports:
+      - 3300:3000
+    volumes:
+      - ./data:/data/data
+    depends_on:
+      - postgres
+      - meilisearch
+
+  meilisearch:
+    image: getmeili/meilisearch:{{ meilisearch_version }}
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - meilidata:/meili_data
+
+volumes:
+  database:
+  meilidata:
