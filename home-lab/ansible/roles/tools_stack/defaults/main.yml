@@ -18,6 +18,10 @@ version_memos: "0.25.3"
 version_freshrss: "latest"
 version_booklore: "latest"
 version_booklore_mariadb: "11.4.5"
+version_jotty: "latest"
+
+# Repositories
+repository_jotty: "ghcr.io/fccview/jotty"
 
 # Ports
 port_it_tools: "8080"
@@ -33,6 +37,7 @@ port_bytestash: "8089"
 port_memos: "8090"
 port_freshrss: "8091"
 port_booklore: "8092"
+port_jotty: "8093"
 
 # Secret (Leave empty to auto-generate on first run)
 convertx_jwt_secret: ""
@@ -58,3 +63,6 @@ memos_extensions_dir: "/freshrss/extensions"
 booklore_dir: "/booklore"
 booklore_db_root_password: "CHANGE_ME"
 booklore_db_password: "CHANGE_ME"
+
+# jotty
+jotty_dir: "/jotty"

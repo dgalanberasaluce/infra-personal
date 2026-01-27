@@ -195,6 +195,20 @@ services:
       timeout: 5s
       retries: 10
 
+  jotty:
+    image: {{ repository_jotty }}:{{ version_jotty }}
+    container_name: jotty
+    user: "1000:1000"
+    ports:
+      - "{{port_jotty}}:3000"
+    volumes:
+      - "{{ stack_install_dir }}/{{ jotty_dir }}/data:/app/data:rw"
+      - "{{ stack_install_dir }}/{{ jotty_dir }}/config:/app/config:rw"
+      - "{{ stack_install_dir }}/{{ jotty_dir }}/cache:/app/.next/cache:rw" # Optional
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+
 volumes:
   convertx-data:
   cyberchef-data:
