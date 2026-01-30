@@ -41,7 +41,7 @@ services:
 
   bentopdf-simple:
     <<: [*common]
-    image: bentopdf/bentopdf-simple:latest
+    image: ghcr.io/alam00000/bentopdf-simple:1.16.1
     container_name: bentopdf
     ports:
       - "8084:8080"

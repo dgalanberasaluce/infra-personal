@@ -28,14 +28,14 @@
       version_cyberchef: latest
       version_drawio: latest
       version_excalidraw: latest
-      version_bentopdf: latest
+      version_bentopdf: 1.16.1
       version_plantuml: latest
       version_mermaid: latest
       version_convertx: latest
       version_omni_tools: latest
       version_booklore: "v1.17.0"
       version_booklore_mariadb: "11.4.8"
-      verison_jotty: "1.19.1"
+      version_jotty: "1.19.1"
       bytestash_jwt_secret: "{{ vault_bytestash_jwt_secret }}"
       booklore_db_root_password: "{{ vault_booklore_db_root_password}}"
       booklore_db_password: "{{ vault_booklore_db_password }}"

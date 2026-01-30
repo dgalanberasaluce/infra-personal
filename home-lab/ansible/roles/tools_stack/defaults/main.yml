@@ -21,6 +21,7 @@ version_booklore_mariadb: "11.4.5"
 version_jotty: "latest"
 
 # Repositories
+repository_bentopdf: "ghcr.io/alam00000/bentopdf-simple"
 repository_jotty: "ghcr.io/fccview/jotty"
 
 # Ports

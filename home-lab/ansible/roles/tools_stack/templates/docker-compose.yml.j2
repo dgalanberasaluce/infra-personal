@@ -41,7 +41,7 @@ services:
 
   bentopdf-simple:
     <<: [*common]
-    image: bentopdf/bentopdf-simple:{{ version_bentopdf }}
+    image: {{ repository_bentopdf }}:{{ version_bentopdf }}
     container_name: bentopdf
     ports:
       - "{{ port_bentopdf }}:8080"
