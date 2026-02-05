@@ -1,0 +1,20 @@
+version: 3
+projects:
+- name: dev-app
+  dir: live/dev/app
+  workflow: terragrunt
+  autoplan:
+    when_modified:
+      - "*.hcl"
+      - "*.tf" 
+      - "../../../modules/**/*.tf" 
+      - "../../../modules/**/*.hcl"  
+
+workflows:
+  terragrunt:
+    plan:
+      steps:
+      - run: terragrunt plan -no-color -out $PLANFILE
+    apply:
+      steps:
+      - run: terragrunt apply -auto-approve $PLANFILE
