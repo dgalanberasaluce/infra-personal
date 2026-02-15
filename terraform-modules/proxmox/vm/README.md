@@ -56,15 +56,10 @@ No modules.
 | <a name="input_vm_boot_from_disk"></a> [vm\_boot\_from\_disk](#input\_vm\_boot\_from\_disk) | Whether to boot the VM from disk | `bool` | `false` | no |
 | <a name="input_vm_boot_order"></a> [vm\_boot\_order](#input\_vm\_boot\_order) | Boot order for the VM. List of devices to boot from in the order they appear in the list. | `list(string)` | `null` | no |
 | <a name="input_vm_cd_drive"></a> [vm\_cd\_drive](#input\_vm\_cd\_drive) | CD/DVD drive configuration for the VM. It requires both clone\_vm to be false and vm\_boot\_from\_disk to be true. | <pre>object({<br/>    interface = optional(string)<br/>    file_id   = optional(string)<br/>  })</pre> | `null` | no |
-| <a name="input_vm_ci_password"></a> [vm\_ci\_password](#input\_vm\_ci\_password) | Cloud-init password | `string` | `""` | no |
-| <a name="input_vm_ci_user"></a> [vm\_ci\_user](#input\_vm\_ci\_user) | Cloud-init username | `string` | `"ubuntu"` | no |
 | <a name="input_vm_cores"></a> [vm\_cores](#input\_vm\_cores) | Number of CPU cores for the VM | `number` | `2` | no |
 | <a name="input_vm_cpu_flags"></a> [vm\_cpu\_flags](#input\_vm\_cpu\_flags) | List of CPU flags for the VM | `list(string)` | `null` | no |
 | <a name="input_vm_cpu_type"></a> [vm\_cpu\_type](#input\_vm\_cpu\_type) | CPU type for the VM | `string` | `"x86-64-v2-AES"` | no |
 | <a name="input_vm_cpu_units"></a> [vm\_cpu\_units](#input\_vm\_cpu\_units) | CPU units for the VM | `number` | `null` | no |
-| <a name="input_vm_disk_size"></a> [vm\_disk\_size](#input\_vm\_disk\_size) | Size of the VM disk (GB) | `number` | `10` | no |
-| <a name="input_vm_disk_storage"></a> [vm\_disk\_storage](#input\_vm\_disk\_storage) | Storage location for the VM disk | `string` | `"local-lvm"` | no |
-| <a name="input_vm_disk_type"></a> [vm\_disk\_type](#input\_vm\_disk\_type) | Disk type for the VM | `string` | `"scsi"` | no |
 | <a name="input_vm_disks"></a> [vm\_disks](#input\_vm\_disks) | List of disk configurations for the VM | <pre>list(object({<br/>    aio          = optional(string)<br/>    backup       = optional(bool)<br/>    cache        = optional(string)<br/>    iothread     = optional(bool)<br/>    datastore_id = optional(string)<br/>    interface    = optional(string)<br/>    size         = optional(number)<br/>    replicate    = optional(bool)<br/>  }))</pre> | `[]` | no |
 | <a name="input_vm_display"></a> [vm\_display](#input\_vm\_display) | The VGA configuration for the VM | <pre>object({<br/>    type   = string<br/>    memory = optional(number)<br/>  })</pre> | <pre>{<br/>  "memory": 0,<br/>  "type": "serial0"<br/>}</pre> | no |
 | <a name="input_vm_enable_qemu_agent"></a> [vm\_enable\_qemu\_agent](#input\_vm\_enable\_qemu\_agent) | Enable QEMU guest agent | `bool` | `null` | no |
@@ -72,7 +67,6 @@ No modules.
 | <a name="input_vm_memory"></a> [vm\_memory](#input\_vm\_memory) | Amount of memory in MB for the VM | `number` | `2048` | no |
 | <a name="input_vm_network_bridge"></a> [vm\_network\_bridge](#input\_vm\_network\_bridge) | Network bridge for the VM | `string` | `"vmbr0"` | no |
 | <a name="input_vm_network_devices"></a> [vm\_network\_devices](#input\_vm\_network\_devices) | n/a | <pre>list(object({<br/>    bridge          = string<br/>    enable_firewall = bool<br/>  }))</pre> | `[]` | no |
-| <a name="input_vm_network_model"></a> [vm\_network\_model](#input\_vm\_network\_model) | Network model for the VM | `string` | `"virtio"` | no |
 | <a name="input_vm_scsihw"></a> [vm\_scsihw](#input\_vm\_scsihw) | SCSI hardware type | `string` | `"virtio-scsi-pci"` | no |
 | <a name="input_vm_sockets"></a> [vm\_sockets](#input\_vm\_sockets) | Number of CPU sockets for the VM | `number` | `1` | no |
 | <a name="input_vm_start_on_boot"></a> [vm\_start\_on\_boot](#input\_vm\_start\_on\_boot) | Whether the VM should start on boot | `bool` | `false` | no |
