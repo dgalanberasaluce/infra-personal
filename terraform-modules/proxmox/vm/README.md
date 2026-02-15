@@ -55,7 +55,7 @@ No modules.
 | <a name="input_vm_bios_type"></a> [vm\_bios\_type](#input\_vm\_bios\_type) | The BIOS implementation for the VM | `string` | `null` | no |
 | <a name="input_vm_boot_from_disk"></a> [vm\_boot\_from\_disk](#input\_vm\_boot\_from\_disk) | Whether to boot the VM from disk | `bool` | `false` | no |
 | <a name="input_vm_boot_order"></a> [vm\_boot\_order](#input\_vm\_boot\_order) | Boot order for the VM. List of devices to boot from in the order they appear in the list. | `list(string)` | `null` | no |
-| <a name="input_vm_cd_drive"></a> [vm\_cd\_drive](#input\_vm\_cd\_drive) | CD/DVD drive configuration for the VM. It requires both clone\_vm to be false and vm\_boot\_from\_disk to be true. | <pre>object({<br/>    interface = optional(string)<br/>    file_id     = optional(string)<br/>  })</pre> | `null` | no |
+| <a name="input_vm_cd_drive"></a> [vm\_cd\_drive](#input\_vm\_cd\_drive) | CD/DVD drive configuration for the VM. It requires both clone\_vm to be false and vm\_boot\_from\_disk to be true. | <pre>object({<br/>    interface = optional(string)<br/>    file_id   = optional(string)<br/>  })</pre> | `null` | no |
 | <a name="input_vm_ci_password"></a> [vm\_ci\_password](#input\_vm\_ci\_password) | Cloud-init password | `string` | `""` | no |
 | <a name="input_vm_ci_user"></a> [vm\_ci\_user](#input\_vm\_ci\_user) | Cloud-init username | `string` | `"ubuntu"` | no |
 | <a name="input_vm_cores"></a> [vm\_cores](#input\_vm\_cores) | Number of CPU cores for the VM | `number` | `2` | no |

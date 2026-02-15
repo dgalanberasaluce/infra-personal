@@ -6,7 +6,6 @@ locals {
   default_tags                = ["managed-by-terraform"]
   vga_hardware_with_memory    = ["std", "vmware", "qxl", "cirrus", "virtio"]
   vga_hardware_without_memory = ["none", "std", "serial0", "serial1", "serial2", "serial3"]
-  vga_hardware                = concat(local.vga_hardware_with_memory, local.vga_hardware_without_memory)
   available_storage           = ["nvme4tb", "local-lvm"]
 
   template_vms = var.clone_vm && var.clone_vm_target != null ? [
