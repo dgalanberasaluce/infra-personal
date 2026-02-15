@@ -1,0 +1,44 @@
+# Local .terraform folders (contains plugins and modules)
+**/.terraform/*
+
+# .tfstate files (Contains sensitive data and infrastructure secrets)
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Exclude override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Exclude CLI configuration files
+.terraformrc
+terraform.rc
+
+# --- Terragrunt Specifics ---
+
+# Terragrunt cache directory
+.terragrunt-cache/
+
+# Terragrunt debug logs
+terragrunt-debug.tfvars.json
+
+# --- Environment/Secret Variables ---
+
+# Ignore local variable files (often used for secrets)
+*.tfvars
+*.tfvars.json
+
+# Ignore local environment files
+.env
+.envrc
+
+.terragrunt-cache
+.terraform
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
