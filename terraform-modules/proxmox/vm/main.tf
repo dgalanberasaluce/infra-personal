@@ -69,10 +69,13 @@ resource "proxmox_virtual_environment_vm" "this" {
     for_each = var.clone_vm || !var.vm_boot_from_disk ? [] : [1]
 
     content {
+      # enabled = true 
       #<datastore_id>:<content_type>/<file_name>
       # proxmox_virtual_environment_download_file
-      file_id   = "local:iso/ubuntu-24.04.3-desktop-amd64.iso"
-      interface = "ide2"
+      # file_id   = "local:iso/ubuntu-24.04.3-desktop-amd64.iso"
+      file_id = lookup(var.vm_cd_drive, "file_id", "none")
+      # interface = "ide2" Proxmox convention is to use ide2 to start from an ISO
+      interface = lookup(var.vm_cd_drive, "interface", "ide2")
     }
   }
 

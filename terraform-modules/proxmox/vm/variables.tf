@@ -257,6 +257,16 @@ variable "vm_disks" {
   default = []
 }
 
+variable "vm_cd_drive" {
+  description = "CD/DVD drive configuration for the VM. It requires both clone_vm to be false and vm_boot_from_disk to be true."
+  type = object({
+    interface = optional(string)
+    file_id     = optional(string)
+  })
+  default = null
+}
+
+
 # Cloud-Init Configuration
 variable "vm_ci_user" {
   description = "Cloud-init username"
@@ -281,6 +291,11 @@ variable "efi_disk" {
     type              = string
   })
   default = null
+
+  validation {
+    condition     = var.vm_bios_type != "ovmf" || var.efi_disk != null
+    error_message = "If vm_bios_type is set to 'ovmf', efi_disk is required"
+  }
 }
 
 variable "vm_tags" {
