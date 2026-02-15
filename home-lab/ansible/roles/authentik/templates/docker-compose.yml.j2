@@ -1,0 +1,101 @@
+services:
+  postgresql:
+    image: docker.io/library/postgres:{{ postgres_version }}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_USER: authentik
+      POSTGRES_DB: authentik
+    env_file: .env
+    networks:
+      - authentik_net
+
+  redis:
+    image: docker.io/library/redis:alpine
+    command: --save 60 1 --loglevel warning
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - redis:/data
+    env_file: .env
+    networks:
+      - authentik_net
+
+  server:
+    image: ghcr.io/goauthentik/server:{{ authentik_version }}
+    command: server
+    environment:
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+    volumes:
+      - ./media:/media
+      - ./custom-templates:/templates
+    env_file: .env
+    ports:
+    #  - "${COMPOSE_PORT_HTTP}:9000"
+      - "${COMPOSE_PORT_HTTPS}:9443"
+    depends_on:
+      - postgresql
+      - redis
+    networks:
+      - authentik_net
+
+  worker:
+    image: ghcr.io/goauthentik/server:{{ authentik_version }}
+    command: worker
+    environment:
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+    # root user required for future integrations
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./media:/media
+      - ./certs:/certs
+      - ./custom-templates:/templates
+    env_file: .env
+    depends_on:
+      - postgresql
+      - redis
+    networks:
+      - authentik_net
+
+{% if enable_cloudflare_tunnel %}
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN={{ cloudflare_tunnel_token }}
+    networks:
+      - authentik_net
+    depends_on:
+      - server
+  {% endif %}
+
+volumes:
+  database:
+  redis:
+
+networks:
+  authentik_net:
+    driver: bridge
