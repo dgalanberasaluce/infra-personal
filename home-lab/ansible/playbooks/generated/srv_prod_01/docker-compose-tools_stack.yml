@@ -1,0 +1,222 @@
+x-common: &common
+  restart: unless-stopped
+
+services:
+
+  it-tools:
+    <<: [*common]
+    image: corentinth/it-tools:2024.10.22-7ca5933
+    container_name: it-tools
+    ports:
+      - "8080:80"
+
+  cyberchef:
+    <<: [*common]
+    image: ghcr.io/gchq/cyberchef:10.22.1
+    container_name: cyberchef
+    ports:
+      - "8081:80"
+    volumes:
+      - cyberchef-data:/var/lib/cyberchef:rw
+
+  diagrams:
+    <<: [*common]
+    image: jgraph/drawio:29.3.6
+    container_name: diagrams
+    ports:
+      - "8082:8080"
+    environment:
+      - DRAWIO_BASE_URL=/draw
+      - DRAWIO_LIGHTBOX_URL=
+    tmpfs:
+      - /tmp
+      - /run/jetty
+
+  excalidraw:
+    <<: [*common]
+    image: excalidraw/excalidraw:latest
+    container_name: excalidraw
+    ports:
+      - "8083:80"
+
+  bentopdf-simple:
+    <<: [*common]
+    image: ghcr.io/alam00000/bentopdf-simple:2.2.1
+    container_name: bentopdf
+    ports:
+      - "8084:8080"
+
+  plantuml:
+    <<: [*common]
+    image: plantuml/plantuml-server:v1.2026.1
+    container_name: plantuml
+    ports:
+      - "8085:8080"
+    tmpfs:
+      - /tmp
+      - /var/run/jetty
+
+  mermaid:
+    <<: [*common]
+    image: ghcr.io/mermaid-js/mermaid-live-editor:latest
+    container_name: mermaid
+    ports:
+      - "8086:8080"
+
+  convertx:
+    <<: [*common]
+    image: ghcr.io/c4illin/convertx:latest
+    container_name: convertx
+    ports:
+      - "8087:3000"
+    environment:
+      - ACCOUNT_REGISTRATION=true
+      - HTTP_ALLOWED=true
+      - ALLOW_UNAUTHENTICATED=false
+      - LANGUAGE=en
+    #  - JWT_SECRET=${CONVERTX_JWT_SECRET}
+    volumes:
+      - convertx-data:/app/data:rw
+
+  omni-tools:
+    <<: [*common]
+    image: iib0011/omni-tools:0.6
+    container_name: omni-tools
+    ports:
+      - "8088:80"
+  
+  bytestash:
+    <<: [*common]
+    image: ghcr.io/jordan-dalby/bytestash:1.5.11
+    volumes:
+      - /opt/tools_stack//bytestash/data:/data/snippets
+    ports:
+      - "8089:5000"
+    environment:
+      #ALLOWED_HOSTS: ${BYTESTASH_ALLOWED_HOSTS}
+      BASE_PATH: ${BYTESTASH_BASE_PATH}
+      JWT_SECRET: ${BYTESTASH_JWT_SECRET}
+      TOKEN_EXPIRY: ${BYTESTASH_TOKEN_EXPIRY}
+      ALLOW_NEW_ACCOUNTS: ${BYTESTASH_ALLOW_NEW_ACCOUNTS}
+      DEBUG: ${BYTESTASH_DEBUG}
+      DISABLE_ACCOUNTS: ${BYTESTASH_DISABLE_ACCOUNTS}
+      DISABLE_INTERNAL_ACCOUNTS: ${BYTESTASH_DISABLE_INTERNAL_ACCOUNTS}
+
+      # See https://github.com/jordan-dalby/ByteStash/wiki/Single-Sign%E2%80%90on-Setup for more info
+      OIDC_ENABLED: ${BYTESTASH_OIDC_ENABLED}
+      OIDC_DISPLAY_NAME: ${BYTESTASH_OIDC_DISPLAY_NAME:-""}
+      OIDC_ISSUER_URL: ${BYTESTASH_OIDC_ISSUER_URL:-""}
+      OIDC_CLIENT_ID: ${BYTESTASH_OIDC_CLIENT_ID:-""}
+      OIDC_CLIENT_SECRET: ${BYTESTASH_OIDC_CLIENT_SECRET:-""}
+      OIDC_SCOPES: ${BYTESTASH_OIDC_SCOPES:-""}
+
+  memos:
+    <<: [*common]
+    image: neosmemo/memos:0.26.1
+    volumes:
+      - /opt/tools_stack//memos:/var/opt/memos
+    ports:
+      - "8090:5230"
+
+#  freshrss:
+#    <<: [*common]
+#    image: freshrss/freshrss:latest
+#    container_name: freshrss
+#    logging:
+#      options:
+#        max-size: 10m
+#    ports:
+#      - "8091:80"
+#    volumes:
+#      - freshrss-data:/var/www/FreshRSS/data
+#      - /opt/tools_stack//freshrss/extensions:/var/www/FreshRSS/extensions
+#    environment:
+#      TZ: Europe/Paris
+#      CRON_MIN: '3,33'
+#      TRUSTED_PROXY: ${FRESHRSS_TRUSTED_PROXY}
+
+  init-booklore:
+    image: busybox
+    command: sh -c "chown -R ${BOOKLORE_APP_USER_ID}:${BOOKLORE_APP_GROUP_ID} /app/data"
+    volumes:
+      - booklore-data:/app/data
+
+  booklore:
+    <<: [*common]
+    image: ghcr.io/booklore-app/booklore:v1.17.0
+    container_name: booklore
+    environment:
+      - USER_ID=${BOOKLORE_APP_USER_ID}
+      - GROUP_ID=${BOOKLORE_APP_GROUP_ID}
+      - TZ=${BOOKLORE_TZ}
+      - DATABASE_URL=jdbc:mariadb://booklore_mariadb:3306/${BOOKLORE_MYSQL_DATABASE}
+      - DATABASE_USERNAME=${BOOKLORE_DB_USER}
+      - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
+      - BOOKLORE_PORT=${BOOKLORE_PORT}
+      - TELEMETRY_ENABLED=false
+    depends_on:
+      init-booklore:
+        condition: service_completed_successfully
+      booklore_mariadb:
+        condition: service_healthy
+    ports:
+      - "8092:${BOOKLORE_PORT}"
+    volumes:
+      - booklore-data:/app/data
+      - "/opt/tools_stack//booklore/books:/books"
+      - "/opt/tools_stack//booklore/bookdrop:/bookdrop"
+    networks:
+      - booklore_network
+    healthcheck:
+      test: wget -q -O - http://localhost:${BOOKLORE_PORT}/api/v1/healthcheck
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+
+  booklore_mariadb:
+    image: lscr.io/linuxserver/mariadb:11.4.8
+    container_name: booklore_mariadb
+    environment:
+      - PUID=${BOOKLORE_DB_USER_ID}
+      - PGID=${BOOKLORE_DB_GROUP_ID}
+      - TZ=${BOOKLORE_TZ}
+      - MYSQL_ROOT_PASSWORD=${BOOKLORE_MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${BOOKLORE_MYSQL_DATABASE}
+      - MYSQL_USER=${BOOKLORE_DB_USER}
+      - MYSQL_PASSWORD=${BOOKLORE_DB_PASSWORD}
+    volumes:
+      - booklore-mariadb:/config
+    restart: unless-stopped
+    networks:
+      - booklore_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  jotty:
+    image: ghcr.io/fccview/jotty:1.19.1
+    container_name: jotty
+    user: "1000:1000"
+    ports:
+      - "8093:3000"
+    volumes:
+      - "/opt/tools_stack//jotty/data:/app/data:rw"
+      - "/opt/tools_stack//jotty/config:/app/config:rw"
+      - "/opt/tools_stack//jotty/cache:/app/.next/cache:rw" # Optional
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+
+volumes:
+  convertx-data:
+  cyberchef-data:
+  freshrss-data:
+  booklore-data:
+  booklore-mariadb:
+
+networks:
+  booklore_network:
+    driver: bridge

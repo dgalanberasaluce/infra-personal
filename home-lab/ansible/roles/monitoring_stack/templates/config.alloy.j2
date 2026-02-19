@@ -1,0 +1,244 @@
+// =============================================================================
+// GLOBAL CONFIGURATION
+// =============================================================================
+
+//logging {
+//  level  = "warn"
+//  format = "logfmt"
+//}
+
+// ==========================================
+// SYSTEM METRICS
+// ==========================================
+
+prometheus.exporter.unix "host" {
+  procfs_path = "/host/proc"
+  sysfs_path  = "/host/sys"
+  rootfs_path = "/host/root"
+  
+  // Optional: Disable noise collectors in contaneirized systems
+  disable_collectors = ["ipvs", "btrfs", "infiniband", "xfs", "zfs"]
+}
+
+prometheus.exporter.process "host_processes" {
+  procfs_path  = "/host/proc"
+  track_children = false
+  
+  // Avoid "Not found any information about referenced bytes..." error
+  gather_smaps = false 
+}
+
+prometheus.scrape "linux_host" {
+  targets = concat(
+    prometheus.exporter.unix.host.targets,
+    prometheus.exporter.process.host_processes.targets,
+  )
+
+  job_name        = "node_exporter"
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.victoriametrics.receiver]
+}
+
+// PVE Exporter Scrape only on server
+{% if monitoring_role == 'server' %}
+prometheus.scrape "proxmox_scraper" {
+  targets = [{
+    __address__ = "pve-exporter:9221",
+  }]
+  
+  // Proxmox IP
+  params = { "target" = ["{{ proxmox_server_ip }}"] } 
+  metrics_path = "/pve"
+  
+  forward_to = [prometheus.remote_write.victoriametrics.receiver]
+}
+{% endif %}
+
+// ==========================================
+// SYSTEM LOGS
+// ==========================================
+
+loki.source.journal "logs_host_journal" {
+    max_age       = "12h" // No leer historia muy antigua al arrancar
+    path          = "/var/log/journal"
+
+    // Filtramos para enviar solo lo importante (equivalente a syslog/kern.log)
+    // _TRANSPORT=kernel es el equivalente a kern.log
+    relabel_rules = discovery.relabel.filtered_journal.rules
+
+    forward_to    = [loki.write.loki_server.receiver]
+}
+
+discovery.relabel "filtered_journal" {
+    targets = []
+
+    rule {
+        target_label = "instance"
+        replacement  = sys.env("HOSTNAME")
+    }
+
+    // Optional: label "source" to diff between kernel and non-kernel
+    rule {
+        source_labels = ["__journal__transport"]
+        target_label  = "source"
+    }
+}
+
+{% if monitor_docker %}
+// ==========================================
+// DOCKER MODULE
+// ==========================================
+
+discovery.docker "docker_containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "docker_metrics_relabel" {
+  targets = discovery.docker.docker_containers.targets
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+prometheus.scrape "docker_scrape" {
+  //targets = array.concat(
+  //  prometheus.exporter.cadvisor.docker_metrics.targets,
+  //)
+  targets    = discovery.relabel.docker_metrics_relabel.output
+  job_name = "docker_metrics"
+  scrape_interval = "15s"
+
+  forward_to = [prometheus.remote_write.victoriametrics.receiver]
+}
+
+// cAdvisor
+discovery.relabel "external_cadvisor_overrides" {
+  targets = [{
+    __address__ = "cadvisor:8080",
+  }]
+
+  rule {
+    target_label = "instance"
+    replacement  = sys.env("HOSTNAME")
+  }
+}
+
+prometheus.scrape "external_cadvisor" {
+  targets = discovery.relabel.external_cadvisor_overrides.output
+  forward_to = [prometheus.remote_write.victoriametrics.receiver]
+}
+
+// NOTE: The current internal version is outdated and using legacy docker storage config
+//prometheus.exporter.cadvisor "internal_cadvisor" {
+//  docker_host = "unix:///var/run/docker.sock"
+//  
+//  // disable disk and network metrics
+//  disabled_metrics = ["disk", "diskIO", "tcp", "udp", "percpu", "referenced_memory"]
+//
+//  // Optimization: Save only some labels
+//  store_container_labels = false
+//  allowlisted_container_labels = ["com.docker.compose.service", "com.docker.compose.project", "org.opencontainers.image.title"]
+//}
+//
+//prometheus.scrape "cadvisor_scrape" {
+//  targets    = prometheus.exporter.cadvisor.internal_cadvisor.targets
+//  forward_to = [prometheus.remote_write.victoriametrics.receiver]
+//  scrape_interval = "15s"
+//  job_name        = "cadvisor"
+//}
+
+// (Optional) Aplications srapping (exposed through metrics)
+discovery.docker "apps_docker" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "apps_relabel" {
+  targets = discovery.docker.apps_docker.targets
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+prometheus.scrape "apps_scrape" {
+  targets    = discovery.relabel.apps_relabel.output
+  forward_to = [prometheus.remote_write.victoriametrics.receiver]
+  scrape_interval = "15s"
+}
+
+
+// (Optional) Collect logs from containers
+
+discovery.docker "docker_logs" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "docker_logs_integrations" {
+    targets = discovery.docker.docker_logs.targets
+
+    // Set hostname
+    rule {
+        target_label = "instance"
+        replacement  = sys.env("HOSTNAME")
+    }
+
+    // Use container name instead of container id
+    rule {
+        source_labels = ["__meta_docker_container_name"]
+        regex         = "/(.*)" // Elimina la barra inicial "/" que pone Docker
+        target_label  = "container"
+    }
+
+    // Ignore alloy and grafana logs 
+    rule {
+        source_labels = ["__meta_docker_container_name"]
+        regex         = "/(alloy|loki|victoriametrics|cadvisor).*"
+        action        = "drop"
+    }
+}
+
+loki.source.docker "docker_logs" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.docker_logs_integrations.output
+  forward_to = [loki.write.loki_server.receiver]
+}
+
+{% endif %}
+
+// ==========================================
+// 4. Outputs (REMOTES)
+// ==========================================
+
+// outputs
+{% if monitoring_role == 'server' %}
+  {% set vm_target = "http://victoriametrics:8428/api/v1/write" %}
+  {% set loki_target = "http://loki:3100/loki/api/v1/push" %}
+{% else %}
+  {% set vm_target = "http://" ~ monitoring_hub_ip ~ ":8428/api/v1/write" %}
+  {% set loki_target = "http://" ~ monitoring_hub_ip ~ ":3100/loki/api/v1/push" %}
+{% endif %}
+
+prometheus.remote_write "victoriametrics" {
+  endpoint {
+    url = "{{ vm_target }}"
+  }
+  
+  external_labels = {
+    instance = "{{ inventory_hostname }}",
+    role     = "{{ monitoring_role }}",
+  }
+}
+
+loki.write "loki_server" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+
+  external_labels = {
+    instance = "srv_prod_01",
+    role     = "server",
+ }
+}

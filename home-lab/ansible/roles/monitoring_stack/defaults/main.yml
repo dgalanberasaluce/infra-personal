@@ -1,0 +1,33 @@
+# --- Global configuration ---
+monitoring_base_dir: "/opt/monitoring"
+monitoring_data_dir: "{{ monitoring_base_dir }}/data"
+monitoring_config_dir: "{{ monitoring_base_dir }}/config"
+
+# --- Node role: 'server' or 'agent'
+monitoring_role: "agent" 
+
+# --- Agent configuration ---
+# if monitoring_role == "server" it should use 127.0.0.1
+# if monitoring_role == "agent", it should use the IP of the server
+monitoring_hub_ip: "127.0.0.1" 
+monitor_docker: false
+agent_hostname: "{{ ansible_facts[\"hostname\"] }}"
+
+# --- Images ---
+monitoring_stack_loki_image: "grafana/loki:3.6"
+monitoring_stack_grafana_image: "grafana/grafana:12.3.1"
+monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.133.0-scratch"
+monitoring_stack_alloy_image: "grafana/alloy:v1.12.2"
+monitoring_stack_pve_exporter_image: "prompve/prometheus-pve-exporter:3.8.0"
+# alloy's built-in cadvisor is outdated
+monitoring_stack_cadvisor_image: "ghcr.io/google/cadvisor:0.56.2"
+
+# --- Security ---
+grafana_admin_password: "change_me" # Use Ansible Vault
+
+# Proxmox Exporter (Create user/api token on proxmox)
+pve_exporter_user: "metrics@pve"
+pve_exporter_token_name: "pve-exporter"
+pve_exporter_token_value: "change_me"
+pve_verify_ssl: false
+proxmox_server_ip: "127.0.0.1"

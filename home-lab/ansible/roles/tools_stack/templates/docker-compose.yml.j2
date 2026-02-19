@@ -1,0 +1,222 @@
+x-common: &common
+  restart: unless-stopped
+
+services:
+
+  it-tools:
+    <<: [*common]
+    image: {{ tools_stack_it_tools_image }}
+    container_name: it-tools
+    ports:
+      - "{{ port_it_tools }}:80"
+
+  cyberchef:
+    <<: [*common]
+    image: {{ tools_stack_cyberchef_image }}
+    container_name: cyberchef
+    ports:
+      - "{{ port_cyberchef }}:80"
+    volumes:
+      - cyberchef-data:/var/lib/cyberchef:rw
+
+  diagrams:
+    <<: [*common]
+    image: {{ tools_stack_drawio_image }}
+    container_name: diagrams
+    ports:
+      - "{{ port_diagrams }}:8080"
+    environment:
+      - DRAWIO_BASE_URL=/draw
+      - DRAWIO_LIGHTBOX_URL=
+    tmpfs:
+      - /tmp
+      - /run/jetty
+
+  excalidraw:
+    <<: [*common]
+    image: {{ tools_stack_excalidraw_image }}
+    container_name: excalidraw
+    ports:
+      - "{{ port_excalidraw }}:80"
+
+  bentopdf-simple:
+    <<: [*common]
+    image: {{ tools_stack_bentopdf_image }}
+    container_name: bentopdf
+    ports:
+      - "{{ port_bentopdf }}:8080"
+
+  plantuml:
+    <<: [*common]
+    image: {{ tools_stack_plantuml_image }}
+    container_name: plantuml
+    ports:
+      - "{{ port_plantuml }}:8080"
+    tmpfs:
+      - /tmp
+      - /var/run/jetty
+
+  mermaid:
+    <<: [*common]
+    image: {{ tools_stack_mermaid_image }}
+    container_name: mermaid
+    ports:
+      - "{{ port_mermaid }}:8080"
+
+  convertx:
+    <<: [*common]
+    image: {{ tools_stack_convertx_image }}
+    container_name: convertx
+    ports:
+      - "{{ port_convertx }}:3000"
+    environment:
+      - ACCOUNT_REGISTRATION=true
+      - HTTP_ALLOWED=true
+      - ALLOW_UNAUTHENTICATED=false
+      - LANGUAGE=en
+    #  - JWT_SECRET=${CONVERTX_JWT_SECRET}
+    volumes:
+      - convertx-data:/app/data:rw
+
+  omni-tools:
+    <<: [*common]
+    image: {{ tools_stack_omni_tools_image }}
+    container_name: omni-tools
+    ports:
+      - "{{ port_omni_tools }}:80"
+  
+  bytestash:
+    <<: [*common]
+    image: {{ tools_stack_bytestash_image }}
+    volumes:
+      - {{ stack_install_dir }}/{{ bytestash_data_dir }}:/data/snippets
+    ports:
+      - "{{ port_bytestash }}:5000"
+    environment:
+      #ALLOWED_HOSTS: ${BYTESTASH_ALLOWED_HOSTS}
+      BASE_PATH: ${BYTESTASH_BASE_PATH}
+      JWT_SECRET: ${BYTESTASH_JWT_SECRET}
+      TOKEN_EXPIRY: ${BYTESTASH_TOKEN_EXPIRY}
+      ALLOW_NEW_ACCOUNTS: ${BYTESTASH_ALLOW_NEW_ACCOUNTS}
+      DEBUG: ${BYTESTASH_DEBUG}
+      DISABLE_ACCOUNTS: ${BYTESTASH_DISABLE_ACCOUNTS}
+      DISABLE_INTERNAL_ACCOUNTS: ${BYTESTASH_DISABLE_INTERNAL_ACCOUNTS}
+
+      # See https://github.com/jordan-dalby/ByteStash/wiki/Single-Sign%E2%80%90on-Setup for more info
+      OIDC_ENABLED: ${BYTESTASH_OIDC_ENABLED}
+      OIDC_DISPLAY_NAME: ${BYTESTASH_OIDC_DISPLAY_NAME:-""}
+      OIDC_ISSUER_URL: ${BYTESTASH_OIDC_ISSUER_URL:-""}
+      OIDC_CLIENT_ID: ${BYTESTASH_OIDC_CLIENT_ID:-""}
+      OIDC_CLIENT_SECRET: ${BYTESTASH_OIDC_CLIENT_SECRET:-""}
+      OIDC_SCOPES: ${BYTESTASH_OIDC_SCOPES:-""}
+
+  memos:
+    <<: [*common]
+    image: {{ tools_stack_memos_image }}
+    volumes:
+      - {{ stack_install_dir }}/{{ memos_data_dir }}:/var/opt/memos
+    ports:
+      - "{{ port_memos }}:5230"
+
+#  freshrss:
+#    <<: [*common]
+#    image: {{ tools_stack_freshrss_image }}
+#    container_name: freshrss
+#    logging:
+#      options:
+#        max-size: 10m
+#    ports:
+#      - "{{ port_freshrss }}:80"
+#    volumes:
+#      - freshrss-data:/var/www/FreshRSS/data
+#      - {{ stack_install_dir }}/{{ memos_extensions_dir }}:/var/www/FreshRSS/extensions
+#    environment:
+#      TZ: Europe/Paris
+#      CRON_MIN: '3,33'
+#      TRUSTED_PROXY: ${FRESHRSS_TRUSTED_PROXY}
+
+  init-booklore:
+    image: busybox
+    command: sh -c "chown -R ${BOOKLORE_APP_USER_ID}:${BOOKLORE_APP_GROUP_ID} /app/data"
+    volumes:
+      - booklore-data:/app/data
+
+  booklore:
+    <<: [*common]
+    image: {{ tools_stack_booklore_image }}
+    container_name: booklore
+    environment:
+      - USER_ID=${BOOKLORE_APP_USER_ID}
+      - GROUP_ID=${BOOKLORE_APP_GROUP_ID}
+      - TZ=${BOOKLORE_TZ}
+      - DATABASE_URL=jdbc:mariadb://booklore_mariadb:3306/${BOOKLORE_MYSQL_DATABASE}
+      - DATABASE_USERNAME=${BOOKLORE_DB_USER}
+      - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
+      - BOOKLORE_PORT=${BOOKLORE_PORT}
+      - TELEMETRY_ENABLED=false
+    depends_on:
+      init-booklore:
+        condition: service_completed_successfully
+      booklore_mariadb:
+        condition: service_healthy
+    ports:
+      - "{{ port_booklore }}:${BOOKLORE_PORT}"
+    volumes:
+      - booklore-data:/app/data
+      - "{{ stack_install_dir }}/{{ booklore_dir }}/books:/books"
+      - "{{ stack_install_dir }}/{{ booklore_dir }}/bookdrop:/bookdrop"
+    networks:
+      - booklore_network
+    healthcheck:
+      test: wget -q -O - http://localhost:${BOOKLORE_PORT}/api/v1/healthcheck
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+
+  booklore_mariadb:
+    image: {{ tools_stack_booklore_mariadb_image }}
+    container_name: booklore_mariadb
+    environment:
+      - PUID=${BOOKLORE_DB_USER_ID}
+      - PGID=${BOOKLORE_DB_GROUP_ID}
+      - TZ=${BOOKLORE_TZ}
+      - MYSQL_ROOT_PASSWORD=${BOOKLORE_MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${BOOKLORE_MYSQL_DATABASE}
+      - MYSQL_USER=${BOOKLORE_DB_USER}
+      - MYSQL_PASSWORD=${BOOKLORE_DB_PASSWORD}
+    volumes:
+      - booklore-mariadb:/config
+    restart: unless-stopped
+    networks:
+      - booklore_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  jotty:
+    image: {{ tools_stack_jotty_image }}
+    container_name: jotty
+    user: "1000:1000"
+    ports:
+      - "{{port_jotty}}:3000"
+    volumes:
+      - "{{ stack_install_dir }}/{{ jotty_dir }}/data:/app/data:rw"
+      - "{{ stack_install_dir }}/{{ jotty_dir }}/config:/app/config:rw"
+      - "{{ stack_install_dir }}/{{ jotty_dir }}/cache:/app/.next/cache:rw" # Optional
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+
+volumes:
+  convertx-data:
+  cyberchef-data:
+  freshrss-data:
+  booklore-data:
+  booklore-mariadb:
+
+networks:
+  booklore_network:
+    driver: bridge

@@ -149,3 +149,36 @@ module "forgejo_runner" {
   vm_memory  = 4096
   vm_started = true
 }
+
+module "ubuntu_srv_prod" {
+  source = "../../terraform-modules/proxmox/vm"
+
+  for_each = {
+    srv-prod-01 = {
+      proxmox_vm_id = 401
+    }
+    srv-prod-02 = {
+      proxmox_vm_id = 402
+    }
+  }
+
+  proxmox_node  = "proxmox"
+  proxmox_vm_id = each.value.proxmox_vm_id
+
+  vm_name        = each.key
+  vm_description = lookup(each.value, "description", "Services workloads")
+  vm_tags        = ["ubuntu"]
+
+  clone_vm = true
+  clone_vm_target = {
+    vm_id = 901
+    full  = true
+  }
+
+  vm_enable_qemu_agent = true
+
+  vm_sockets = 1
+  vm_cores   = 4
+  vm_memory  = 8192
+  vm_started = false
+}

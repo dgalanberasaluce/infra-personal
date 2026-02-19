@@ -1,0 +1,110 @@
+- hosts: srv_prod_01 
+  tasks:
+  - name: "Configure qemu agent"
+    import_role:
+      name: qemu_agent
+  - name: "Set up docker"
+    import_role:
+      name: docker_install
+  become: true
+
+
+- hosts: srv_prod_01 
+  become: true
+  tasks:
+  - name: Set up tools_stack
+    import_role:
+      name: tools_stack
+    tags: app
+    vars:
+      tools_stack_it_tools_image: "corentinth/it-tools:2024.10.22-7ca5933"
+      tools_stack_cyberchef_image: "ghcr.io/gchq/cyberchef:10.22.1"
+      tools_stack_drawio_image: "jgraph/drawio:29.3.6"
+      tools_stack_bentopdf_image: "ghcr.io/alam00000/bentopdf-simple:2.2.1"
+      tools_stack_plantuml_image: "plantuml/plantuml-server:v1.2026.1"
+      tools_stack_convertx_image: "ghcr.io/c4illin/convertx:latest"
+      tools_stack_omni_tools_image: "iib0011/omni-tools:0.6"
+      tools_stack_bytestash_image: "ghcr.io/jordan-dalby/bytestash:1.5.11"
+      tools_stack_memos_image: "neosmemo/memos:0.26.1"
+      tools_stack_freshrss_image: "freshrss/freshrss:latest"
+      tools_stack_booklore_image: "ghcr.io/booklore-app/booklore:v1.17.0"
+      tools_stack_booklore_mariadb_image: "lscr.io/linuxserver/mariadb:11.4.8"
+      tools_stack_jotty_image: "ghcr.io/fccview/jotty:1.19.1"
+      bytestash_jwt_secret: "{{ vault_bytestash_jwt_secret }}"
+      booklore_db_root_password: "{{ vault_booklore_db_root_password}}"
+      booklore_db_password: "{{ vault_booklore_db_password }}"
+      
+  - name: Set up monitoring_stack
+    import_role:
+      name: monitoring_stack 
+    tags: monitoring
+    vars:
+      monitoring_role: "server"
+      # image versions
+      monitoring_stack_alloy_image: "grafana/alloy:v1.12.2"
+      monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.133.0-scratch"
+      monitoring_stack_loki_image: "grafana/loki:3.6"
+      monitoring_stack_grafana_image: "grafana/grafana:12.3.1"
+      monitoring_stack_pve_exporter_image: "prompve/prometheus-pve-exporter:3.8.0"
+      monitoring_stack_cadvisor_image: "ghcr.io/google/cadvisor:0.56.2"
+      # credentials
+      grafana_admin_password: "{{ vault_grafana_admin_password }}"
+      pve_exporter_token_value: "{{ vault_pve_exporter_token_value }}"
+      # alloy config
+      monitor_docker: true
+      proxmox_server_ip: "192.168.8.201"
+      
+  - name: Set up linkwarden
+    import_role:
+      name: linkwarden
+    tags: linkwarden
+    vars:
+      # Check compatiblity linkwarden with postgres and meilisearch
+      linkwarden_image: ghcr.io/linkwarden/linkwarden:v2.13.5
+      linkwarden_postgres_password: "{{ vault_linkwarden_postgres_password }}"
+      linkwaren_meili_key: "{{ vault_linkwarden_meili_key }}"
+      linkwarden_nextauth_secret: "{{ vault_linkwarden_nextauth_secret }}"
+
+  - name: Set up Paperless-ngx
+    import_role:
+      name: paperless_ngx
+    tags: paperless
+    vars:
+      paperless_webserver_image: ghcr.io/paperless-ngx/paperless-ngx:2.20.7
+      paperless_broker_image: redis:7.4.7
+      paperless_db_image: postgres:15.16
+
+
+- hosts: caddy_temp
+  become: true
+  roles:
+  - role: caddy_site
+    caddy_site_domain: "grafana.local"
+    caddy_site_upstreams: ["192.168.8.100:3000"]
+    tags: 
+    - grafana_proxy
+    - proxy
+  - role: caddy_site
+    caddy_site_domain: "paperless.local"
+    caddy_site_upstreams: ["192.168.8.100:8000"]
+    tags: 
+    - paperless_proxy
+    - proxy
+  - role: caddy_site
+    caddy_site_domain: "linkwarden.local"
+    caddy_site_upstreams: ["192.168.8.100:3300"]
+    tags:
+    - linkwarden_proxy
+    - proxy
+  - role: caddy_site
+    caddy_site_domain: "memos.local"
+    caddy_site_upstreams: ["192.168.8.100:8090"]
+    tags:
+    - memos_proxy
+    - proxy
+  - role: caddy_site
+    caddy_site_domain: "booklore.local"
+    caddy_site_upstreams: ["192.168.8.100:8092"]
+    tags:
+    - booklore_proxy
+    - proxy

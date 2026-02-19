@@ -1,0 +1,11 @@
+# --- image versions ----
+linkwarden_image: ghcr.io/linkwarden/linkwarden:v2.13.5
+linkwarden_postgres_image: postgres:16.12-alpine3.23
+# note: meilisearch depends on postgres version
+linkwarden_meilisearch_image: getmeili/meilisearch:v1.12.8 
+
+install_dir: "/opt/linkwarden"
+stack_user: "root"
+stack_group: "root"
+
+build_from_source: false

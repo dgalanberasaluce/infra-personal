@@ -1,0 +1,67 @@
+# General Deployment Config
+stack_install_dir: "/opt/tools_stack"
+stack_user: "root"
+stack_group: "root"
+
+# --- images version (Pinned for security) ---
+tools_stack_it_tools_image: "corentinth/it-tools:2024.10.22-7ca5933"
+tools_stack_cyberchef_image: "ghcr.io/gchq/cyberchef:10.19.2"
+tools_stack_drawio_image: "jgraph/drawio:24.4.13"
+# excalidraw uses "latest"
+tools_stack_excalidraw_image: "excalidraw/excalidraw:latest" 
+tools_stack_bentopdf_image: "ghcr.io/alam00000/bentopdf-simple:2.2.1"
+tools_stack_plantuml_image: "plantuml/plantuml-server:v1.2026.1"
+# mermaid uses "latest"
+tools_stack_mermaid_image: "ghcr.io/mermaid-js/mermaid-live-editor:latest"
+tools_stack_convertx_image: "ghcr.io/c4illin/convertx:v0.15.1"
+tools_stack_omni_tools_image: "iib0011/omni-tools:0.6"
+tools_stack_bytestash_image: "ghcr.io/jordan-dalby/bytestash:1.5.9"
+tools_stack_memos_image: "neosmemo/memos:0.25.3"
+tools_stack_freshrss_image: "freshrss/freshrss:latest"
+tools_stack_booklore_image: "ghcr.io/booklore-app/booklore:latest"
+tools_stack_booklore_mariadb_image: "lscr.io/linuxserver/mariadb:11.4.5"
+tools_stack_jotty_image: "ghcr.io/fccview/jotty:latest"
+
+# Ports
+port_it_tools: "8080"
+port_cyberchef: "8081"
+port_diagrams: "8082"
+port_excalidraw: "8083"
+port_bentopdf: "8084"
+port_plantuml: "8085"
+port_mermaid: "8086"
+port_convertx: "8087"
+port_omni_tools: "8088"
+port_bytestash: "8089"
+port_memos: "8090"
+port_freshrss: "8091"
+port_booklore: "8092"
+port_jotty: "8093"
+
+# Secret (Leave empty to auto-generate on first run)
+convertx_jwt_secret: ""
+
+# Bytestash
+bytestash_data_dir: "/bytestash/data"
+bytestash_base_path: ""
+bytestash_jwt_secret: "CHANGE_ME"
+bytestash_token_expiry: 24h
+bytestash_allow_new_accounts: "false"
+bytestash_debug_enabled: "false"
+bytestash_disable_accounts: "true"
+bytestash_disable_internal_accounts: "false"
+bytestash_oidc_enabled: "false"
+
+# Memos
+memos_data_dir: "/memos"
+
+# FreshRSS
+memos_extensions_dir: "/freshrss/extensions"
+
+# Booklore
+booklore_dir: "/booklore"
+booklore_db_root_password: "CHANGE_ME"
+booklore_db_password: "CHANGE_ME"
+
+# jotty
+jotty_dir: "/jotty"
