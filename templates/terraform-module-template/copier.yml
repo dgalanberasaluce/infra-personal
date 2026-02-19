@@ -1,0 +1,7 @@
+tf_module_name:
+    type: str
+    help: What is the name of the terraform module?
+
+_exclude:
+    - "README.md"
+    - "copier.yml"
