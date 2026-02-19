@@ -5,7 +5,7 @@ services:
   # ---------------------------------------------------------
 {% if monitoring_role == 'server' %}
   victoriametrics:
-    image: victoriametrics/victoria-metrics:{{version_victoriametrics}}
+    image: {{ monitoring_stack_victoriametrics_image }}
     container_name: victoriametrics
     restart: unless-stopped
     security_opt:
@@ -27,7 +27,7 @@ services:
   # ---------------------------------------------------------
 {% if monitoring_role == 'server' %}
   loki:
-    image: grafana/loki:{{version_loki}}
+    image: {{ monitoring_stack_loki_image }}
     container_name: loki
     restart: unless-stopped
     volumes:
@@ -45,7 +45,7 @@ services:
   # ---------------------------------------------------------
 {% if monitoring_role == 'server' %}
   grafana:
-    image: grafana/grafana:{{version_grafana}}
+    image: {{ monitoring_stack_grafana_image }}
     container_name: grafana
     restart: unless-stopped
     ports:
@@ -74,7 +74,7 @@ services:
   # ---------------------------------------------------------
 {% if monitoring_role == 'server' %}
   pve-exporter:
-    image: prompve/prometheus-pve-exporter:{{ version_pve_exporter }}
+    image: {{ monitoring_stack_pve_exporter_image }}
     restart: unless-stopped
     ports:
       - "9221:9221"
@@ -91,7 +91,7 @@ services:
   # Data Agent
   # ---------------------------------------------------------
   cadvisor:
-    image: ghcr.io/google/cadvisor:0.56.2
+    image: {{ monitoring_stack_cadvisor_image }}
     container_name: external_cadvisor
     volumes:
       - /:/rootfs:ro
@@ -108,7 +108,7 @@ services:
       - monitoring
 
   alloy:
-    image: grafana/alloy:{{ version_alloy }}
+    image: {{ monitoring_stack_alloy_image }}
     container_name: alloy
     hostname: "{{ ansible_facts["hostname"] }}"
     restart: unless-stopped

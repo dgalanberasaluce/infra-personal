@@ -14,11 +14,13 @@ monitor_docker: false
 agent_hostname: "{{ ansible_facts[\"hostname\"] }}"
 
 # --- Images ---
-version_alloy: "v1.12.2"
-version_victoriametrics: "v1.133.0-scratch"
-version_loki: "3.6"
-version_grafana: "12.3.1"
-version_pve_exporter: "3.8.0"
+monitoring_stack_loki_image: "grafana/loki:3.6"
+monitoring_stack_grafana_image: "grafana/grafana:12.3.1"
+monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.133.0-scratch"
+monitoring_stack_alloy_image: "grafana/alloy:v1.12.2"
+monitoring_stack_pve_exporter_image: "prompve/prometheus-pve-exporter:3.8.0"
+# alloy's built-in cadvisor is outdated
+monitoring_stack_cadvisor_image: "ghcr.io/google/cadvisor:0.56.2"
 
 # --- Security ---
 grafana_admin_password: "change_me" # Use Ansible Vault

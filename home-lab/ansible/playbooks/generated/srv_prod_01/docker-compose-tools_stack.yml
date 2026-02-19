@@ -5,14 +5,14 @@ services:
 
   it-tools:
     <<: [*common]
-    image: corentinth/it-tools:latest
+    image: corentinth/it-tools:2024.10.22-7ca5933
     container_name: it-tools
     ports:
       - "8080:80"
 
   cyberchef:
     <<: [*common]
-    image: ghcr.io/gchq/cyberchef:latest
+    image: ghcr.io/gchq/cyberchef:10.22.1
     container_name: cyberchef
     ports:
       - "8081:80"
@@ -21,7 +21,7 @@ services:
 
   diagrams:
     <<: [*common]
-    image: jgraph/drawio:latest
+    image: jgraph/drawio:29.3.6
     container_name: diagrams
     ports:
       - "8082:8080"
@@ -41,14 +41,14 @@ services:
 
   bentopdf-simple:
     <<: [*common]
-    image: ghcr.io/alam00000/bentopdf-simple:1.16.1
+    image: ghcr.io/alam00000/bentopdf-simple:2.2.1
     container_name: bentopdf
     ports:
       - "8084:8080"
 
   plantuml:
     <<: [*common]
-    image: plantuml/plantuml-server:latest
+    image: plantuml/plantuml-server:v1.2026.1
     container_name: plantuml
     ports:
       - "8085:8080"
@@ -80,14 +80,14 @@ services:
 
   omni-tools:
     <<: [*common]
-    image: iib0011/omni-tools:latest
+    image: iib0011/omni-tools:0.6
     container_name: omni-tools
     ports:
       - "8088:80"
   
   bytestash:
     <<: [*common]
-    image: "ghcr.io/jordan-dalby/bytestash:1.5.9"
+    image: ghcr.io/jordan-dalby/bytestash:1.5.11
     volumes:
       - /opt/tools_stack//bytestash/data:/data/snippets
     ports:
@@ -112,7 +112,7 @@ services:
 
   memos:
     <<: [*common]
-    image: neosmemo/memos:0.25.3
+    image: neosmemo/memos:0.26.1
     volumes:
       - /opt/tools_stack//memos:/var/opt/memos
     ports:
@@ -153,6 +153,7 @@ services:
       - DATABASE_USERNAME=${BOOKLORE_DB_USER}
       - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
       - BOOKLORE_PORT=${BOOKLORE_PORT}
+      - TELEMETRY_ENABLED=false
     depends_on:
       init-booklore:
         condition: service_completed_successfully

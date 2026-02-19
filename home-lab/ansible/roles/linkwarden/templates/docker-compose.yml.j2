@@ -1,7 +1,7 @@
 services:
   
   postgres:
-    image: postgres:{{ postgres_version }}
+    image: {{ linkwarden_postgres_image }}
     env_file: .env
     restart: always
     volumes:
@@ -15,7 +15,7 @@ services:
 {% if build_from_source %}
     build: . # uncomment to build from source
 {% else %}
-    image: ghcr.io/linkwarden/linkwarden:{{ likwarden_version }} # comment to build from source
+    image: {{ linkwarden_image }} # comment to build from source
 {% endif %}
     ports:
       - 3300:3000
@@ -26,7 +26,7 @@ services:
       - meilisearch
 
   meilisearch:
-    image: getmeili/meilisearch:{{ meilisearch_version }}
+    image: {{ linkwarden_meilisearch_image }}
     restart: always
     env_file:
       - .env

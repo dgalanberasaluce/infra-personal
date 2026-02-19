@@ -5,14 +5,14 @@ services:
 
   it-tools:
     <<: [*common]
-    image: corentinth/it-tools:{{ version_it_tools }}
+    image: {{ tools_stack_it_tools_image }}
     container_name: it-tools
     ports:
       - "{{ port_it_tools }}:80"
 
   cyberchef:
     <<: [*common]
-    image: ghcr.io/gchq/cyberchef:{{ version_cyberchef }}
+    image: {{ tools_stack_cyberchef_image }}
     container_name: cyberchef
     ports:
       - "{{ port_cyberchef }}:80"
@@ -21,7 +21,7 @@ services:
 
   diagrams:
     <<: [*common]
-    image: jgraph/drawio:{{ version_drawio }}
+    image: {{ tools_stack_drawio_image }}
     container_name: diagrams
     ports:
       - "{{ port_diagrams }}:8080"
@@ -34,21 +34,21 @@ services:
 
   excalidraw:
     <<: [*common]
-    image: excalidraw/excalidraw:{{ version_excalidraw }}
+    image: {{ tools_stack_excalidraw_image }}
     container_name: excalidraw
     ports:
       - "{{ port_excalidraw }}:80"
 
   bentopdf-simple:
     <<: [*common]
-    image: {{ repository_bentopdf }}:{{ version_bentopdf }}
+    image: {{ tools_stack_bentopdf_image }}
     container_name: bentopdf
     ports:
       - "{{ port_bentopdf }}:8080"
 
   plantuml:
     <<: [*common]
-    image: plantuml/plantuml-server:{{ version_plantuml }}
+    image: {{ tools_stack_plantuml_image }}
     container_name: plantuml
     ports:
       - "{{ port_plantuml }}:8080"
@@ -58,14 +58,14 @@ services:
 
   mermaid:
     <<: [*common]
-    image: ghcr.io/mermaid-js/mermaid-live-editor:{{ version_mermaid }}
+    image: {{ tools_stack_mermaid_image }}
     container_name: mermaid
     ports:
       - "{{ port_mermaid }}:8080"
 
   convertx:
     <<: [*common]
-    image: ghcr.io/c4illin/convertx:{{ version_convertx }}
+    image: {{ tools_stack_convertx_image }}
     container_name: convertx
     ports:
       - "{{ port_convertx }}:3000"
@@ -80,14 +80,14 @@ services:
 
   omni-tools:
     <<: [*common]
-    image: iib0011/omni-tools:{{ version_omni_tools }}
+    image: {{ tools_stack_omni_tools_image }}
     container_name: omni-tools
     ports:
       - "{{ port_omni_tools }}:80"
   
   bytestash:
     <<: [*common]
-    image: "ghcr.io/jordan-dalby/bytestash:{{ version_bytestash }}"
+    image: {{ tools_stack_bytestash_image }}
     volumes:
       - {{ stack_install_dir }}/{{ bytestash_data_dir }}:/data/snippets
     ports:
@@ -112,7 +112,7 @@ services:
 
   memos:
     <<: [*common]
-    image: neosmemo/memos:{{ version_memos }}
+    image: {{ tools_stack_memos_image }}
     volumes:
       - {{ stack_install_dir }}/{{ memos_data_dir }}:/var/opt/memos
     ports:
@@ -120,7 +120,7 @@ services:
 
 #  freshrss:
 #    <<: [*common]
-#    image: freshrss/freshrss:{{ version_freshrss }}
+#    image: {{ tools_stack_freshrss_image }}
 #    container_name: freshrss
 #    logging:
 #      options:
@@ -143,7 +143,7 @@ services:
 
   booklore:
     <<: [*common]
-    image: ghcr.io/booklore-app/booklore:{{ version_booklore }}
+    image: {{ tools_stack_booklore_image }}
     container_name: booklore
     environment:
       - USER_ID=${BOOKLORE_APP_USER_ID}
@@ -153,6 +153,7 @@ services:
       - DATABASE_USERNAME=${BOOKLORE_DB_USER}
       - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
       - BOOKLORE_PORT=${BOOKLORE_PORT}
+      - TELEMETRY_ENABLED=false
     depends_on:
       init-booklore:
         condition: service_completed_successfully
@@ -174,7 +175,7 @@ services:
       timeout: 10s
 
   booklore_mariadb:
-    image: lscr.io/linuxserver/mariadb:{{ version_booklore_mariadb }}
+    image: {{ tools_stack_booklore_mariadb_image }}
     container_name: booklore_mariadb
     environment:
       - PUID=${BOOKLORE_DB_USER_ID}
@@ -196,7 +197,7 @@ services:
       retries: 10
 
   jotty:
-    image: {{ repository_jotty }}:{{ version_jotty }}
+    image: {{ tools_stack_jotty_image }}
     container_name: jotty
     user: "1000:1000"
     ports:

@@ -2,14 +2,14 @@ version: "3.8"
 
 services:
   broker:
-    image: redis:7
+    image: {{ paperless_broker_image }}
     container_name: paperless-redis
     restart: unless-stopped
     volumes:
       - {{ paperless_dir }}/redis:/data
 
   db:
-    image: postgres:15
+    image: {{ paperless_db_image }}
     container_name: paperless-db
     restart: unless-stopped
     volumes:
@@ -20,7 +20,7 @@ services:
       POSTGRES_PASSWORD: {{ paperless_db_password }}
 
   webserver:
-    image: ghcr.io/paperless-ngx/paperless-ngx:{{ paperless_version }}
+    image: {{ paperless_webserver_image }}
     container_name: paperless-web
     restart: unless-stopped
     depends_on:

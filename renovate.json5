@@ -1,0 +1,47 @@
+// Renovate configuration file
+// This configuration file is used by Renovate Bot to automate dependency updates in the project
+// Renovate Bot is configured to run on the self-hosted git repository (Forgejo) 
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":timezone(Europe/Madrid)", 
+    ":semanticCommits" // Uses semantic commits (fix, chore, feat)
+    //":enablePreCommit" // enable if using pre-commit hooks
+  ],
+
+  "includePaths": [
+    "home-lab/**/*.yml",
+    "home-lab/**/*.yaml",
+  ],
+
+  "prCreation": "immediate",
+  "rebaseWhen": "conflicted",
+
+  "labels": [
+    "renovate"
+  ],
+
+  "enabledManagers": ["regex"],
+  "regexManagers": [
+  {
+      "description": "Update image version passed as variable on ansible/playbooks",
+      "fileMatch": ["^home-lab/ansible/playbooks/.*\\.ya?ml$"],
+      "matchStrings": [
+        "(?m)^\\s*(?<variableName>\\w+_image):\\s*['\"]?(?<depName>[^:'\"\\s]+):(?<currentValue>[^\"'\\s]+)['\"]?"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ],
+
+
+  "packageRules": [
+    {
+      "description": "Automerge minor and patches updates on stable versions (major > 0)",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": ">=1.0.0",
+      "automerge": true
+    }
+  ]
+}
