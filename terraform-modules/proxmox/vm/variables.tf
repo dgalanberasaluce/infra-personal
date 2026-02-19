@@ -202,12 +202,6 @@ variable "enable_network" {
   default     = true
 }
 
-variable "vm_network_model" {
-  description = "Network model for the VM"
-  type        = string
-  default     = "virtio"
-}
-
 variable "vm_network_bridge" {
   description = "Network bridge for the VM"
   type        = string
@@ -224,24 +218,6 @@ variable "vm_network_devices" {
 }
 
 # Disk Configuration
-variable "vm_disk_type" {
-  description = "Disk type for the VM"
-  type        = string
-  default     = "scsi"
-}
-
-variable "vm_disk_storage" {
-  description = "Storage location for the VM disk"
-  type        = string
-  default     = "local-lvm"
-}
-
-variable "vm_disk_size" {
-  description = "Size of the VM disk (GB)"
-  type        = number
-  default     = 10
-}
-
 variable "vm_disks" {
   description = "List of disk configurations for the VM"
   type = list(object({
@@ -257,18 +233,13 @@ variable "vm_disks" {
   default = []
 }
 
-# Cloud-Init Configuration
-variable "vm_ci_user" {
-  description = "Cloud-init username"
-  type        = string
-  default     = "ubuntu"
-}
-
-variable "vm_ci_password" {
-  description = "Cloud-init password"
-  type        = string
-  sensitive   = true
-  default     = ""
+variable "vm_cd_drive" {
+  description = "CD/DVD drive configuration for the VM. It requires both clone_vm to be false and vm_boot_from_disk to be true."
+  type = object({
+    interface = optional(string)
+    file_id   = optional(string)
+  })
+  default = null
 }
 
 # Other Configurations
@@ -281,6 +252,11 @@ variable "efi_disk" {
     type              = string
   })
   default = null
+
+  validation {
+    condition     = var.vm_bios_type != "ovmf" || var.efi_disk != null
+    error_message = "If vm_bios_type is set to 'ovmf', efi_disk is required"
+  }
 }
 
 variable "vm_tags" {

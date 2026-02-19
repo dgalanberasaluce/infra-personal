@@ -1,0 +1,65 @@
+services:
+  gitea:
+    container_name: gitea_server
+    image: gitea/gitea:latest
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__webhook__ALLOWED_HOST_LIST=*
+      - GITEA__server__DOMAIN=gitea
+      - GITEA__server__ROOT_URL=http://gitea:3000/
+    ports:
+      - "3000:3000"  # web ui
+      - "2222:22"    # ssh
+    volumes:
+      - ./gitea_data:/data
+    networks:
+      - devops-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/version"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  atlantis:
+    container_name: atlantis_server
+    build:
+      context: .
+      dockerfile: Dockerfile.atlantis
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Alternative: external network
+    ports:
+      - "4141:4141"
+    environment:
+      # --- Localstack credentials ---
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+
+      # --- Gitea config ---
+      - ATLANTIS_GITEA_USER=atlantis_bot
+      - ATLANTIS_GITEA_TOKEN=${GITEA_TOKEN}
+      - ATLANTIS_GITEA_WEBHOOK_SECRET=${GITEA_SECRET}
+      - ATLANTIS_GITEA_BASE_URL=http://gitea:3000
+
+      # --- atlantis contiguration ---
+      - ATLANTIS_ATLANTIS_URL=http://atlantis:4141
+      - ATLANTIS_REPO_ALLOWLIST=*
+      - ATLANTIS_REPO_CONFIG_JSON={"repos":[{"id":"/.*/", "allowed_overrides":["workflow"], "allow_custom_workflows":true}]}
+      # - ATLANTIS_REPO_CONFIG_JSON={"repos":[{"id":"/.*/", "workflow":"terragrunt", "allowed_overrides":["workflow"], "allow_custom_workflows":true}]}
+
+      # --- Optimization ---
+     # - TF_PLUGIN_CACHE_DIR=/var/lib/terraform-plugin-cache
+      - ATLANTIS_AUTOPLAN_FILE_LIST=**/*.hcl,**/*.tf,**/*.js 
+    #volumes:
+      #- ./terraform-plugin-cache:/var/lib/terraform-plugin-cache
+    networks:
+      - devops-net
+    depends_on:
+      gitea:
+        condition: service_healthy
+
+networks:
+  devops-net:
+    driver: bridge

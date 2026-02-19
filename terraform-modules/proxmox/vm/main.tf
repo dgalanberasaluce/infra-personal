@@ -6,7 +6,6 @@ locals {
   default_tags                = ["managed-by-terraform"]
   vga_hardware_with_memory    = ["std", "vmware", "qxl", "cirrus", "virtio"]
   vga_hardware_without_memory = ["none", "std", "serial0", "serial1", "serial2", "serial3"]
-  vga_hardware                = concat(local.vga_hardware_with_memory, local.vga_hardware_without_memory)
   available_storage           = ["nvme4tb", "local-lvm"]
 
   template_vms = var.clone_vm && var.clone_vm_target != null ? [
@@ -69,10 +68,13 @@ resource "proxmox_virtual_environment_vm" "this" {
     for_each = var.clone_vm || !var.vm_boot_from_disk ? [] : [1]
 
     content {
+      # enabled = true 
       #<datastore_id>:<content_type>/<file_name>
       # proxmox_virtual_environment_download_file
-      file_id   = "local:iso/ubuntu-24.04.3-desktop-amd64.iso"
-      interface = "ide2"
+      # file_id   = "local:iso/ubuntu-24.04.3-desktop-amd64.iso"
+      file_id = lookup(var.vm_cd_drive, "file_id", "none")
+      # interface = "ide2" Proxmox convention is to use ide2 to start from an ISO
+      interface = lookup(var.vm_cd_drive, "interface", "ide2")
     }
   }
 
