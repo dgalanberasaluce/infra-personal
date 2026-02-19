@@ -5,4 +5,4 @@
     - docker_install
     - forgejo-runner
   vars:
-    runner_image: "code.forgejo.org/forgejo/runner:12.3.1"
+    runner_image: "code.forgejo.org/forgejo/runner:12.7.0"
