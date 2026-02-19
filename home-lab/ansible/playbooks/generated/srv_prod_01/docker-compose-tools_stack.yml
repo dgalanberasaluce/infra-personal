@@ -143,7 +143,7 @@ services:
 
   booklore:
     <<: [*common]
-    image: ghcr.io/booklore-app/booklore:v1.17.0
+    image: ghcr.io/booklore-app/booklore:v1.18.5
     container_name: booklore
     environment:
       - USER_ID=${BOOKLORE_APP_USER_ID}
