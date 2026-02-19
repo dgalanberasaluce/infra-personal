@@ -1,0 +1,24 @@
+cloudflare_zone_id = "abcdef1234567890abcdef1234567890"
+
+standard_records = {
+  "api_endpoint" = {
+    name    = "api"
+    type    = "A"
+    content = "1.1.1.1"
+    proxied = true
+    comment = "Main API routing"
+  }
+  "txt_verification" = {
+    name    = "@"
+    type    = "TXT"
+    content = "v=spf1 include:_spf.google.com ~all"
+  }
+}
+
+mx_records = {
+  "primary_mx" = {
+    name     = "@"
+    content  = "aspmx.l.google.com"
+    priority = 1
+  }
+}
