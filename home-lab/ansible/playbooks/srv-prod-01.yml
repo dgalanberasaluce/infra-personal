@@ -41,7 +41,7 @@
     vars:
       monitoring_role: "server"
       # image versions
-      monitoring_stack_alloy_image: "grafana/alloy:v1.12.2"
+      monitoring_stack_alloy_image: "grafana/alloy:v1.13.1"
       monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.133.0-scratch"
       monitoring_stack_loki_image: "grafana/loki:3.6"
       monitoring_stack_grafana_image: "grafana/grafana:12.3.3"
