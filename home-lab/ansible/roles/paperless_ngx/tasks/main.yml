@@ -7,6 +7,7 @@
   delegate_to: localhost
   become: false
   tags:
+  - local
   - debug
 
 - name: Render docker-compose.yml locally
@@ -16,6 +17,7 @@
   delegate_to: localhost
   become: false
   tags:
+  - local
   - debug
 
 
@@ -29,12 +31,14 @@
     # group: "{{ stack_group }}"
     mode: "0755"
   loop:
-    - data
-    - media
     - export
     - consume
-    - postgres
-    - redis
+
+- name: Deploy .env file
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "{{ paperless_dir }}/.env"
+    mode: '0600'
 
 - name: Template docker-compose.yml
   ansible.builtin.template:

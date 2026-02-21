@@ -1,23 +1,21 @@
-version: "3.8"
-
 services:
   broker:
-    image: redis:8.6.0
+    image: docker.io/library/redis:8.6.0
     container_name: paperless-redis
     restart: unless-stopped
     volumes:
-      - /opt/paperless/redis:/data
+      - redisdata:/data
 
   db:
-    image: postgres:15.16
+    image: docker.io/library/postgres:17.8
     container_name: paperless-db
     restart: unless-stopped
     volumes:
-      - /opt/paperless/postgres:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: paperless
-      POSTGRES_USER: paperless
-      POSTGRES_PASSWORD: paperless
+      POSTGRES_DB: ${PAPERLESS_DBNAME}
+      POSTGRES_USER: ${PAPERLESS_DBUSER}
+      POSTGRES_PASSWORD: ${PAPERLESS_DBPASS}
 
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:2.20.7
@@ -29,23 +27,29 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /opt/paperless/data:/usr/src/paperless/data
-      - /opt/paperless/media:/usr/src/paperless/media
+      - data:/usr/src/paperless/data
+      - media:/usr/src/paperless/media
       - /opt/paperless/export:/usr/src/paperless/export
       - /opt/paperless/consume:/usr/src/paperless/consume
     environment:
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_DBHOST: db
-      PAPERLESS_DBNAME: paperless
-      PAPERLESS_DBUSER: paperless
-      PAPERLESS_DBPASS: paperless
+      PAPERLESS_DBNAME: ${PAPERLESS_DBNAME}
+      PAPERLESS_DBUSER: ${PAPERLESS_DBUSER}
+      PAPERLESS_DBPASS: ${PAPERLESS_DBPASS}
 
-      PAPERLESS_SECRET_KEY: changeme
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
       PAPERLESS_TIME_ZONE: UTC
 
-      PAPERLESS_ADMIN_USER: admin
-      PAPERLESS_ADMIN_PASSWORD: admin
-      PAPERLESS_ADMIN_MAIL: admin@example.com
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
+      PAPERLESS_ADMIN_MAIL: ${PAPERLESS_ADMIN_MAIL}
 
-      PAPERLESS_ALLOWED_HOSTS: "paperless.local,192.168.8.100"
-      PAPERLESS_URL: "https://paperless.local"
+      PAPERLESS_ALLOWED_HOSTS: ${PAPERLESS_ALLOWED_HOSTS}
+      PAPERLESS_URL: ${PAPERLESS_URL}
+
+volumes:
+  data:
+  media:
+  pgdata:
+  redisdata:

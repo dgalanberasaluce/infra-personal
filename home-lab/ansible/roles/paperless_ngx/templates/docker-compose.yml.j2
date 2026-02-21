@@ -4,18 +4,18 @@ services:
     container_name: paperless-redis
     restart: unless-stopped
     volumes:
-      - {{ paperless_dir }}/redis:/data
+      - redisdata:/data
 
   db:
     image: {{ paperless_db_image }}
     container_name: paperless-db
     restart: unless-stopped
     volumes:
-      - {{ paperless_dir }}/postgres:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: {{ paperless_db_name }}
-      POSTGRES_USER: {{ paperless_db_user }}
-      POSTGRES_PASSWORD: {{ paperless_db_password }}
+      POSTGRES_DB: ${PAPERLESS_DBNAME}
+      POSTGRES_USER: ${PAPERLESS_DBUSER}
+      POSTGRES_PASSWORD: ${PAPERLESS_DBPASS}
 
   webserver:
     image: {{ paperless_webserver_image }}
@@ -27,23 +27,29 @@ services:
     ports:
       - "{{ paperless_web_port }}:8000"
     volumes:
-      - {{ paperless_dir }}/data:/usr/src/paperless/data
-      - {{ paperless_dir }}/media:/usr/src/paperless/media
+      - data:/usr/src/paperless/data
+      - media:/usr/src/paperless/media
       - {{ paperless_dir }}/export:/usr/src/paperless/export
       - {{ paperless_dir }}/consume:/usr/src/paperless/consume
     environment:
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_DBHOST: db
-      PAPERLESS_DBNAME: {{ paperless_db_name }}
-      PAPERLESS_DBUSER: {{ paperless_db_user }}
-      PAPERLESS_DBPASS: {{ paperless_db_password }}
+      PAPERLESS_DBNAME: ${PAPERLESS_DBNAME}
+      PAPERLESS_DBUSER: ${PAPERLESS_DBUSER}
+      PAPERLESS_DBPASS: ${PAPERLESS_DBPASS}
 
-      PAPERLESS_SECRET_KEY: {{ paperless_secret_key }}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
       PAPERLESS_TIME_ZONE: {{ paperless_time_zone }}
 
-      PAPERLESS_ADMIN_USER: {{ paperless_admin_user }}
-      PAPERLESS_ADMIN_PASSWORD: {{ paperless_admin_password }}
-      PAPERLESS_ADMIN_MAIL: {{ paperless_admin_email }}
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
+      PAPERLESS_ADMIN_MAIL: ${PAPERLESS_ADMIN_MAIL}
 
-      PAPERLESS_ALLOWED_HOSTS: "paperless.local,192.168.8.100"
-      PAPERLESS_URL: "https://paperless.local"
+      PAPERLESS_ALLOWED_HOSTS: ${PAPERLESS_ALLOWED_HOSTS}
+      PAPERLESS_URL: ${PAPERLESS_URL}
+
+volumes:
+  data:
+  media:
+  pgdata:
+  redisdata:

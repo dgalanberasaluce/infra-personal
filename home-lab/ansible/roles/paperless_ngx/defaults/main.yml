@@ -1,7 +1,7 @@
 # --- image versions ---
 paperless_webserver_image: ghcr.io/paperless-ngx/paperless-ngx:2.20.7
-paperless_broker_image: redis:7.4.7
-paperless_db_image: postgres:15.16
+paperless_broker_image: docker.io/library/redis:8
+paperless_db_image: docker.io/library/postgres:17.8
 
 # --- paperless config ---
 paperless_dir: /opt/paperless

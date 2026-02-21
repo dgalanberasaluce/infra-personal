@@ -71,40 +71,15 @@
     tags: paperless
     vars:
       paperless_webserver_image: ghcr.io/paperless-ngx/paperless-ngx:2.20.7
-      paperless_broker_image: redis:8.6.0
-      paperless_db_image: postgres:15.16
-
-
-- hosts: caddy_temp
-  become: true
-  roles:
-  - role: caddy_site
-    caddy_site_domain: "grafana.local"
-    caddy_site_upstreams: ["192.168.8.100:3000"]
-    tags: 
-    - grafana_proxy
-    - proxy
-  - role: caddy_site
-    caddy_site_domain: "paperless.local"
-    caddy_site_upstreams: ["192.168.8.100:8000"]
-    tags: 
-    - paperless_proxy
-    - proxy
-  - role: caddy_site
-    caddy_site_domain: "linkwarden.local"
-    caddy_site_upstreams: ["192.168.8.100:3300"]
-    tags:
-    - linkwarden_proxy
-    - proxy
-  - role: caddy_site
-    caddy_site_domain: "memos.local"
-    caddy_site_upstreams: ["192.168.8.100:8090"]
-    tags:
-    - memos_proxy
-    - proxy
-  - role: caddy_site
-    caddy_site_domain: "booklore.local"
-    caddy_site_upstreams: ["192.168.8.100:8092"]
-    tags:
-    - booklore_proxy
-    - proxy
+      paperless_broker_image: docker.io/library/redis:8.6.0
+      paperless_db_image: docker.io/library/postgres:17.8
+      # Credentials
+      paperless_admin_user: "{{ vault_paperless_admin_user }}"
+      paperless_admin_password: "{{ vault_paperless_admin_password }}"
+      paperless_admin_email: "{{ vault_paperless_admin_email }}"
+      paperless_secret_key: "{{ vault_paperless_secret_key }}"
+      paperless_db_user: "{{ vault_paperless_db_user }}"
+      paperless_db_password: "{{ vault_paperless_db_password }}"
+      # Paperless Config
+      paperless_allowed_hosts: "paperless.internal"
+      paperless_url: "https://paperless.internal"
