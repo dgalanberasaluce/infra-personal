@@ -21,7 +21,7 @@ services:
 
   diagrams:
     <<: [*common]
-    image: jgraph/drawio:29.3.6
+    image: jgraph/drawio:29.5.1
     container_name: diagrams
     ports:
       - "8082:8080"
@@ -41,7 +41,7 @@ services:
 
   bentopdf-simple:
     <<: [*common]
-    image: ghcr.io/alam00000/bentopdf-simple:2.2.1
+    image: ghcr.io/alam00000/bentopdf-simple:2.3.1
     container_name: bentopdf
     ports:
       - "8084:8080"
@@ -197,7 +197,7 @@ services:
       retries: 10
 
   jotty:
-    image: ghcr.io/fccview/jotty:1.19.1
+    image: ghcr.io/fccview/jotty:1.20.0
     container_name: jotty
     user: "1000:1000"
     ports:

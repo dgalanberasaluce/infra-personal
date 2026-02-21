@@ -67,7 +67,7 @@ services:
   # Proxmox Data Exporter
   # ---------------------------------------------------------
   pve-exporter:
-    image: prompve/prometheus-pve-exporter:3.8.0
+    image: prompve/prometheus-pve-exporter:3.8.1
     restart: unless-stopped
     ports:
       - "9221:9221"
@@ -100,7 +100,7 @@ services:
       - monitoring
 
   alloy:
-    image: grafana/alloy:v1.12.2
+    image: grafana/alloy:v1.13.1
     container_name: alloy
     hostname: "srv-prod-01"
     restart: unless-stopped
