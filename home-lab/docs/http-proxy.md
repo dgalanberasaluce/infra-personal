@@ -28,7 +28,7 @@ Caddy is configured to act as a reverse proxy for the services running in the ho
   }
 }
 
-import /etc/cady/sites/*.caddy
+import /etc/caddy/sites/*.caddy
 ```
 
 ## Set up caddy
@@ -86,3 +86,10 @@ Restart caddy (Alpine) - It is required to take the new config
 ```bash
 rc-service caddy restart
 ```
+
+Format `Caddyfile`
+```bash
+caddy fmt --overwrite
+```
+
+Caddy stores configuration like SSL Certificates within the `/var/lib/caddy` folder
