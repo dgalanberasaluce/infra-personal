@@ -1,6 +1,6 @@
 # Renovate
 ## Create a Renovate Bot account
-Forgejo does not support "Service Account". Although it is not strictaly necessary, it is a good practice to create a dedicated user for Renovate Bot. This way, I can easily track the changes made by Renovate and manage its permissions separately from the personal account.
+Forgejo does not support _service accounts_. Although it is not strictly necessary, it is a good practice to create a dedicated user for Renovate Bot. This way, I can easily track the changes made by Renovate and manage its permissions separately from the personal account.
 
 Create a new user in Forgejo:
 - User: `renovate-bot`
