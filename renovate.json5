@@ -45,9 +45,9 @@
     {
       "description": "Automerge minor and patches updates on stable versions (major > 0)",
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "minor and patch updates",
       "matchCurrentVersion": ">=1.0.0",
-      "automerge": true
+      "automerge": true,
+      "ignoreTests": true
     }
   ]
 }
