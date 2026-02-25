@@ -35,8 +35,13 @@
     }
   ],
 
-
   "packageRules": [
+    {
+      "description": "Group all updates within the same Ansible playbook into a single PR",
+      "matchFileNames": ["home-lab/ansible/playbooks/**"],
+      "groupName": "Update dependencies in {{{packageFile}}}",
+      "groupSlug": "{{{packageFile}}}"
+    },
     {
       "description": "Automerge minor and patches updates on stable versions (major > 0)",
       "matchUpdateTypes": ["minor", "patch"],
