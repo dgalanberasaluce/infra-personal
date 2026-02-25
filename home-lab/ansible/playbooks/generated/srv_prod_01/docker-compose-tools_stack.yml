@@ -21,7 +21,7 @@ services:
 
   diagrams:
     <<: [*common]
-    image: jgraph/drawio:29.5.1
+    image: jgraph/drawio:29.5.2
     container_name: diagrams
     ports:
       - "8082:8080"
@@ -112,7 +112,7 @@ services:
 
   memos:
     <<: [*common]
-    image: neosmemo/memos:0.26.1
+    image: neosmemo/memos:0.26.2
     volumes:
       - /opt/tools_stack//memos:/var/opt/memos
     ports:

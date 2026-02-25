@@ -1,6 +1,6 @@
 services:
   broker:
-    image: docker.io/library/redis:8.6.0
+    image: docker.io/library/redis:8.6.1
     container_name: paperless-redis
     restart: unless-stopped
     volumes:
@@ -18,7 +18,7 @@ services:
       POSTGRES_PASSWORD: ${PAPERLESS_DBPASS}
 
   webserver:
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.7
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.8
     container_name: paperless-web
     restart: unless-stopped
     depends_on:
