@@ -96,6 +96,7 @@ terraform.rc
 !/.git
 
 
-#
+# Avoid commiting secrets and environment variables
 **/.env
 !templates/**/.env
+*.pem

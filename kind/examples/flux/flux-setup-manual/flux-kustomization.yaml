@@ -1,0 +1,14 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: flux-example-kustomization
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./kind/examples/flux/manifests
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-example-repo
+    namespace: flux-system
+  validation: client
