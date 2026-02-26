@@ -24,7 +24,7 @@
 
   "enabledManagers": ["regex"],
   "regexManagers": [
-  {
+    {
       "description": "Update image version passed as variable on ansible/playbooks",
       "fileMatch": ["^home-lab/ansible/playbooks/.*\\.ya?ml$"],
       "matchStrings": [
@@ -37,10 +37,17 @@
 
   "packageRules": [
     {
-      "description": "Group all updates within the same Ansible playbook into a single PR",
+      "description": "Group minor and patch updates within the same Ansible playbook into a single PR",
       "matchFileNames": ["home-lab/ansible/playbooks/**"],
+      "matchUpdateTypes": ["minor", "patch"],
       "groupName": "Update dependencies in {{{packageFile}}}",
       "groupSlug": "{{{packageFile}}}"
+    },
+    {
+      "description": "Separate minor updates for pre-1.0.0 versions into individual PRs (potential breaking changes)",
+      "matchUpdateTypes": ["minor"],
+      "matchCurrentVersion": "<1.0.0",
+      "groupName": null
     },
     {
       "description": "Automerge minor and patches updates on stable versions (major > 0)",
