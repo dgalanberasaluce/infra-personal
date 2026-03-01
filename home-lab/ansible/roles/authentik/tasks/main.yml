@@ -1,3 +1,22 @@
+# Generate docker-compose locally
+- name: Ensure local directory exists for generated compose
+  file:
+    path: "generated/{{ inventory_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+- name: Render docker-compose.yml locally
+  template:
+    src: docker-compose.yml.j2
+    dest: "generated/{{ inventory_hostname }}/docker-compose-{{role_name}}.yml"
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+# Remote host
 - name: Set up Authentik base directory
   ansible.builtin.file:
     path: "{{ authentik_base_dir }}"

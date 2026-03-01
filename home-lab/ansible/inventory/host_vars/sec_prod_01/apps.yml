@@ -1,0 +1,20 @@
+---
+applications:
+  - name: "authentik_core"
+    role_name: "authentik"
+    domain: "auth.internal"
+    target_ip: "{{ ansible_host }}"
+
+## Images
+authentik_image: "ghcr.io/goauthentik/server:2026.2.0"
+authentik_postgres_image: "docker.io/library/postgres:16-alpine"
+authentik_redis_image: "docker.io/library/redis:8.6.1-alpine"
+cloudflare_tunnel_image: "cloudflare/cloudflared:2026.2.0"
+
+## Authentik configuration
+authentik_secret_key: "{{ vault_authentik_secret }}"
+authentik_pg_pass: "{{ vault_postgres_pass }}"
+
+## Cloudflare Tunnel Configuration
+cloudflare_tunnel_token: "{{ vault_tunnel_token }}"
+enable_cloudflare_tunnel: true

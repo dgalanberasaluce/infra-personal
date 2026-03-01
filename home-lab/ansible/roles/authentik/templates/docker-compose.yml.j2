@@ -1,6 +1,6 @@
 services:
   postgresql:
-    image: docker.io/library/postgres:{{ postgres_version }}
+    image: {{ authentik_postgres_image }}
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
@@ -19,7 +19,7 @@ services:
       - authentik_net
 
   redis:
-    image: docker.io/library/redis:alpine
+    image: {{ authentik_redis_image }}
     command: --save 60 1 --loglevel warning
     restart: unless-stopped
     healthcheck:
@@ -35,7 +35,7 @@ services:
       - authentik_net
 
   server:
-    image: ghcr.io/goauthentik/server:{{ authentik_version }}
+    image: {{ authentik_image }}
     command: server
     environment:
       AUTHENTIK_REDIS__HOST: redis
@@ -57,7 +57,7 @@ services:
       - authentik_net
 
   worker:
-    image: ghcr.io/goauthentik/server:{{ authentik_version }}
+    image: {{ authentik_image }}
     command: worker
     environment:
       AUTHENTIK_REDIS__HOST: redis
@@ -81,11 +81,11 @@ services:
 
 {% if enable_cloudflare_tunnel %}
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: {{ cloudflare_tunnel_image }} 
     restart: unless-stopped
     command: tunnel run
     environment:
-      - TUNNEL_TOKEN={{ cloudflare_tunnel_token }}
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
       - authentik_net
     depends_on:
