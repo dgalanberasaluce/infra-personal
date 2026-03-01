@@ -6,6 +6,7 @@
     mode: '0755'
   delegate_to: localhost
   become: false
+  tags: [generate_manifests]
 
 - name: Render docker-compose.yml locally
   template:
@@ -13,8 +14,7 @@
     dest: "generated/{{ inventory_hostname }}/docker-compose-{{ role_name }}.yml"
   delegate_to: localhost
   become: false
-  tags:
-  - generate
+  tags: [generate_manifests]
 
 # Remote host
 - name: Set up application base directory

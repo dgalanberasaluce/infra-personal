@@ -58,27 +58,27 @@
 # # ==============================================================================
 # # Reverse Proxy Configuration
 # # ==============================================================================
-# - name: Configure caddyfiles
-#   hosts: proxy_servers
-#   become: true
-#   tags: [proxy]
-#   vars:
-#     raw_apps: "{{ groups['caddy_managed'] | map('extract', hostvars, 'applications') | select('defined') | flatten }}"
-#     single_apps: "{{ raw_apps | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
-#     stack_apps: "{{ raw_apps | selectattr('stack_services', 'defined') | map(attribute='stack_services') | flatten | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
-#     valid_proxied_services: "{{ single_apps + stack_apps }}"
-#   tasks:
-#     - name: "Update Caddy Configuration"
-#       ansible.builtin.include_role:
-#         name: caddy_site
-#       vars:
-#         caddy_site_domain: "{{ app_item.domain }}"
-#         caddy_site_upstreams: 
-#           - "{{ app_item.target_ip }}:{{ app_item.target_port }}"
-#       loop: "{{ valid_proxied_services }}"
-#       loop_control:
-#         loop_var: app_item
-#       tags: [generate_caddyfile, deploy_proxy]
+- name: Configure caddyfiles
+  hosts: proxy_servers
+  become: true
+  tags: [proxy]
+  vars:
+    raw_apps: "{{ groups['caddy_managed'] | map('extract', hostvars, 'applications') | select('defined') | flatten }}"
+    single_apps: "{{ raw_apps | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    stack_apps: "{{ raw_apps | selectattr('stack_services', 'defined') | map(attribute='stack_services') | flatten | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    valid_proxied_services: "{{ single_apps + stack_apps }}"
+  tasks:
+    - name: "Update Caddy Configuration"
+      ansible.builtin.include_role:
+        name: caddy_site
+      vars:
+        caddy_site_domain: "{{ app_item.domain }}"
+        caddy_site_upstreams: 
+          - "{{ app_item.target_ip }}:{{ app_item.target_port }}"
+      loop: "{{ valid_proxied_services }}"
+      loop_control:
+        loop_var: app_item
+      tags: [generate_caddyfile, deploy_proxy]
 
 
 # # ==============================================================================
