@@ -1,12 +1,31 @@
-- name: Create install directory
+# Generate docker-compose locally
+- name: Ensure local directory exists for generated compose
+  file:
+    path: "generated/{{ inventory_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+- name: Render docker-compose.yml locally
+  template:
+    src: docker-compose.yml.j2
+    dest: "generated/{{ inventory_hostname }}/docker-compose-{{role_name}}.yml"
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+# Remote host
+- name: Ensure application directory exists
   ansible.builtin.file:
     path: "{{ install_dir }}"
     state: directory
     mode: '0755'
 
 - name: Copy docker-compose.yml to the server
-  template:
-    src: docker-compose.j2
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
     dest: "{{ install_dir }}/docker-compose.yml"
     owner: root
     group: root
@@ -47,3 +66,4 @@
     project_src: "{{ install_dir }}"
     state: present
     pull: always
+    remove_orphans: true

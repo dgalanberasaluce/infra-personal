@@ -1,0 +1,4 @@
+- name: Restart runner service
+  ansible.builtin.command:
+    cmd: docker compose restart runner
+    chdir: "{{ install_dir }}"
