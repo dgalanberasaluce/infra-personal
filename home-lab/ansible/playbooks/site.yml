@@ -84,12 +84,39 @@
 # # ==============================================================================
 # # DNS Management
 # # ==============================================================================
-# - name: Update Technitium DNS Records
-#   hosts: dns_managers
-#   tags: dns
-#   tasks:
-#     - name: "Register DNS records via API"
-#       ansible.builtin.import_role:
-#         name: technitium_dns
-#       delegate_to: localhost
-#       become: false
+- name: Update Technitium DNS Records
+  hosts: localhost
+  connection: local
+  become: false
+  tags: [dns]
+  vars:
+    raw_apps: "{{ groups['caddy_managed'] | map('extract', hostvars, 'applications') | select('defined') | flatten }}"
+    single_apps: "{{ raw_apps | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    stack_apps: "{{ raw_apps | selectattr('stack_services', 'defined') | map(attribute='stack_services') | flatten | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    valid_proxied_services: "{{ single_apps + stack_apps }}"
+    caddy_proxy_ip: "{{ hostvars['caddy_01']['ansible_host'] }}"
+  tasks:
+    - name: "Register DNS records via API for all proxied applications"
+      ansible.builtin.include_role:
+        name: technitium_dns
+        
+    # Enable below and comment out above to troubleshoot  
+    # - name: "[MOCK] Debug Technitium DNS API payload"
+    #   ansible.builtin.debug:
+    #     msg: 
+    #       - "API Endpoint: {{ technitium_api_url }}/api/zones/records/add"
+    #       - "Token: (Hidden for security)"
+    #       - "Target Zone: {{ dns_zone_name }}"
+    #       - "Record Name: {{ dns_record_name }}"
+    #       - "Record Type: {{ dns_record_type }}"
+    #       - "Target IP Value: {{ dns_record_value }}"
+      loop: "{{ valid_proxied_services }}"
+      loop_control:
+        loop_var: app_item
+      vars:
+        technitium_api_url: "{{ global_technitium_api_url }}"
+        technitium_token: "{{ global_technitium_token}}"
+        dns_record_name: "{{ app_item.domain.split('.')[0] }}"
+        dns_zone_name: "{{ app_item.domain.split('.')[1] }}"
+        dns_record_type: "A"
+        dns_record_value: "{{ hostvars['caddy_01']['ansible_host'] }}"

@@ -1,0 +1,30 @@
+all:
+  children:
+    proxmox_ubuntu_vms:
+      vars:
+        ansible_user: <user>
+        ansible_private_key_file: <ssh_key_path>
+      hosts:
+        srv_prod_01:
+          ansible_host: <ip_address>
+        srv_prod_02:
+          ansible_host: <ip_address>
+    proxmox_lxcs:
+      vars:
+        ansible_user: <user>
+        ansible_private_key_file: <ssh_key_path>
+      hosts:
+        caddy_01:
+          ansible_host: <ip_address>
+
+  # Grouping hosts by role and function for targeted playbook execution
+    docker_hosts:
+      hosts:
+        srv_prod_01:
+        srv_prod_02:
+    proxy_servers:
+      hosts:
+        caddy_01:
+    caddy_managed:
+      hosts:
+        srv_prod_01:

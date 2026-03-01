@@ -1,0 +1,2 @@
+global_technitium_api_url: "{{ vault_technitium_api_url }}"
+global_technitium_token: "{{ vault_technitium_token }}"
