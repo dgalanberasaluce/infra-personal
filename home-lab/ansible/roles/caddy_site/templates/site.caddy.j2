@@ -1,0 +1,49 @@
+# Caddyfile configuration for {{ caddy_site_domain }}
+# Managed by Ansible - Do not edit manually
+
+{{ caddy_site_domain }} {
+	# TLS Configuration
+{% if caddy_site_tls == 'internal' %}
+	tls internal
+{% elif caddy_site_tls %}
+	tls {{ caddy_site_tls }}
+{% endif %}
+
+	# Compression
+{% if caddy_site_compression %}
+	encode zstd gzip
+{% endif %}
+
+	# Logging
+{% if caddy_site_logging %}
+	log {
+		output file {{ caddy_log_dir }}/{{ caddy_site_domain }}.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+{% endif %}
+
+	# Basic Authentication
+{% if caddy_site_basic_auth %}
+	basicauth * {
+{% for user, pass in caddy_site_basic_auth.items() %}
+		{{ user }} {{ pass }}
+{% endfor %}
+	}
+{% endif %}
+
+	# Extra/Custom Configuration
+{% if caddy_site_extra_config %}
+	{{ caddy_site_extra_config }}
+{% endif %}
+
+	# Reverse Proxy
+{% if caddy_site_upstreams %}
+	reverse_proxy {{ caddy_site_upstreams | join(' ') }} {
+		# Common proxy headers for proper forwarding
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+{% endif -%}
+}

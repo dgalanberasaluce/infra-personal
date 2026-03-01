@@ -1,0 +1,170 @@
+---
+# ==============================================================================
+# APPLICATION ROUTING & DNS
+# proxy-server (caddy) and dns-server (technitium) roles will iterate dynamically over this list.
+# ==============================================================================
+applications:
+
+  - name: "monitoring"
+    role_name: "monitoring_stack"
+    domain: "grafana.internal"
+    target_ip: "{{ ansible_host }}"
+    target_port: 3000
+
+  - name: "paperless"
+    role_name: "paperless_ngx"
+    domain: "paperless.internal"
+    target_ip: "{{ ansible_host }}"
+    target_port: 8000
+
+  - name: "linkwarden"
+    role_name: "linkwarden"
+    domain: "linkwarden.internal"
+    target_ip: "{{ ansible_host }}"
+    target_port: 3300
+
+  - name: "tools_stack"
+    role_name: "tools_stack"
+    stack_services:
+      - name: "it-tools"
+        domain: "ittools.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8080
+      - name: "cyberchef"
+        domain: "cyberchef.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8081
+      - name: "diagrams"
+        domain: "diagrams.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8092
+      - name: "excalidraw"
+        domain: "excalidraw.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8083
+      - name: "bentopdf"
+        domain: "bentopdf.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8084
+      - name: "plantuml"
+        domain: "plantuml.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8085
+      - name: "mermaid"
+        domain: "mermaid.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8086
+      - name: "convertx"
+        domain: "convertx.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8087
+      - name: "omni-tools"
+        domain: "omni-tools.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8088
+      - name: "bytestash"
+        domain: "bytestash.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8089
+      - name: "memos"
+        domain: "memos.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8090
+      - name: "freshrss"
+        domain: "freshrss.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8091
+      - name: "booklore"
+        domain: "booklore.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8092
+      - name: "jotty"
+        domain: "jotty.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8093
+
+# ==============================================================================
+# 2. IMAGE VERSIONS & CONFIGURATIONS (Public/Safe GitOps Data)
+# ==============================================================================
+# Tools Stack
+tools_stack_it_tools_image: "corentinth/it-tools:2024.10.22-7ca5933"
+tools_stack_cyberchef_image: "ghcr.io/gchq/cyberchef:10.22.1"
+tools_stack_drawio_image: "jgraph/drawio:29.5.2"
+tools_stack_bentopdf_image: "ghcr.io/alam00000/bentopdf-simple:2.3.3"
+tools_stack_plantuml_image: "plantuml/plantuml-server:v1.2026.1"
+tools_stack_convertx_image: "ghcr.io/c4illin/convertx:latest"
+tools_stack_omni_tools_image: "iib0011/omni-tools:0.6"
+tools_stack_bytestash_image: "ghcr.io/jordan-dalby/bytestash:1.5.11"
+tools_stack_memos_image: "neosmemo/memos:0.26.2"
+tools_stack_freshrss_image: "freshrss/freshrss:latest"
+tools_stack_booklore_image: "ghcr.io/booklore-app/booklore:v2.0.3"
+tools_stack_booklore_mariadb_image: "lscr.io/linuxserver/mariadb:11.4.8"
+tools_stack_jotty_image: "ghcr.io/fccview/jotty:1.20.0"
+
+# Monitoring Stack
+monitoring_role: "server"
+monitor_docker: true
+monitoring_stack_alloy_image: "grafana/alloy:v1.13.2"
+monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.136.0-scratch"
+monitoring_stack_loki_image: "grafana/loki:3.6"
+monitoring_stack_grafana_image: "grafana/grafana:12.4.0"
+monitoring_stack_pve_exporter_image: "prompve/prometheus-pve-exporter:3.8.1"
+monitoring_stack_cadvisor_image: "ghcr.io/google/cadvisor:0.56.2"
+
+# Linkwarden
+linkwarden_image: "ghcr.io/linkwarden/linkwarden:v2.13.5"
+
+# Paperless-ngx
+paperless_webserver_image: "ghcr.io/paperless-ngx/paperless-ngx:2.20.8"
+paperless_broker_image: "docker.io/library/redis:8.6.1"
+paperless_db_image: "docker.io/library/postgres:17.9"
+paperless_allowed_hosts: "paperless.internal"
+paperless_url: "https://paperless.internal"
+
+# ==============================================================================
+# 3. OPENBAO / HASHICORP VAULT LOOKUPS
+# Replaces your local vault.yml and hardcoded plaintext tokens.
+# The VAULT_TOKEN environment variable is injected by the GitHub Actions runner.
+# ==============================================================================
+# Tools Stack Secrets
+# bytestash_jwt_secret: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/tools:bytestash_jwt url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# booklore_db_root_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/tools:booklore_root_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# booklore_db_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/tools:booklore_db_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+bytestash_jwt_secret: "{{ vault_bytestash_jwt_secret }}"
+booklore_db_root_password: "{{ vault_booklore_db_root_password }}"
+booklore_db_password: "{{ vault_booklore_db_password }}"
+
+# # Monitoring Stack Secrets
+# grafana_admin_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/monitoring:grafana_admin_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# pve_exporter_token_value: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/monitoring:pve_exporter_token url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+grafana_admin_password: "{{ vault_grafana_admin_password }}"
+pve_exporter_token_value: "{{ vault_pve_exporter_token_value }}"
+
+
+# # Linkwarden Secrets
+# linkwarden_postgres_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/linkwarden:pg_password url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# linkwaren_meili_key: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/linkwarden:meili_key url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# linkwarden_nextauth_secret: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/linkwarden:nextauth_secret url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+linkwarden_postgres_password: "{{ vault_linkwarden_postgres_password }}"
+linkwaren_meili_key: "{{ vault_linkwarden_meili_key }}"
+linkwarden_nextauth_secret: "{{ vault_linkwarden_nextauth_secret }}"
+
+# # Paperless Secrets
+# paperless_admin_user: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:admin_user url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# paperless_admin_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:admin_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# paperless_admin_email: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:admin_email url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# paperless_secret_key: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:secret_key url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# paperless_db_user: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:db_user url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+# paperless_db_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:db_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+paperless_admin_user: "{{ vault_paperless_admin_user }}"
+paperless_admin_password: "{{ vault_paperless_admin_password }}"
+paperless_admin_email: "{{ vault_paperless_admin_email }}"
+paperless_secret_key: "{{ vault_paperless_secret_key }}"
+paperless_db_user: "{{ vault_paperless_db_user }}"
+paperless_db_password: "{{ vault_paperless_db_password }}"
+
+# # DNS API Variables (Moved from playbook)
+# technitium_api_url: "http://192.168.8.240:5380"
+# technitium_token: "{{ lookup('hashi_vault', 'secret=secret/data/infrastructure/dns:technitium_api_token url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
+technitium_api_url: "{{ vault_technitium_api_url }}" # "http://192.168.8.240:5380"
+technitium_token: "{{ vault_technitium_token }}"

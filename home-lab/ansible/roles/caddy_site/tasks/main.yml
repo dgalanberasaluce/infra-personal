@@ -1,0 +1,55 @@
+---
+# Generate Caddyfile static file locally
+- name: Ensure local directory exists for generated compose
+  file:
+    path: "generated/caddy/{{ inventory_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+  tags: [generate_caddyfile]
+
+- name: Render Caddyfile site configuration locally  
+  ansible.builtin.template:
+    src: site.caddy.j2
+    dest: "generated/caddy/{{ inventory_hostname }}/{{ caddy_site_domain }}.caddy"
+  delegate_to: localhost
+  become: false
+  tags: [generate_caddyfile]
+
+# Remote host
+- name: Ensure configuration directory exists
+  ansible.builtin.file:
+    path: "{{ caddy_conf_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Ensure log directory exists (if logging is enabled)
+  ansible.builtin.file:
+    path: "{{ caddy_log_dir }}"
+    state: directory
+    owner: caddy
+    group: caddy
+    mode: '0755'
+  when: caddy_site_logging
+
+# Create log file before running validate, otherwise it is created as root
+- name: Create log file if it does not exist
+  ansible.builtin.copy:
+    dest: "{{ caddy_log_dir }}/{{ caddy_site_domain }}.log"
+    content: ""   
+    force: no     
+    owner: caddy
+    group: caddy
+    mode: '0600'
+  when: caddy_site_logging
+
+- name: Generate Caddy site configuration
+  ansible.builtin.template:
+    src: site.caddy.j2
+    dest: "{{ caddy_conf_dir }}/{{ caddy_site_domain }}.caddy"
+    owner: root
+    group: root
+    mode: '0644'
+    validate: caddy validate --adapter caddyfile --config %s
+  notify: Reload Caddy

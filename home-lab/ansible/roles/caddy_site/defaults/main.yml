@@ -1,0 +1,30 @@
+---
+# Default configuration for the Caddy site role
+
+# The domain name for the site (Required)
+caddy_site_domain: "localhost"
+
+# Backend configuration (Reverse Proxy)
+# List of upstream servers (e.g., ["192.168.1.50:8080"])
+caddy_site_upstreams: []
+
+# Enable compression (gzip/zstd)
+caddy_site_compression: true
+
+# Enable basic logging to file
+caddy_site_logging: true
+caddy_log_dir: "/var/log/caddy"
+
+# TLS Configuration (email for Let's Encrypt)
+# Set to 'internal' for local CA, or an email address
+caddy_site_tls: "internal"
+
+# Basic Authentication (Optional)
+# Format: { username: "hashed_password" }
+caddy_site_basic_auth: {}
+
+# Extra configuration snippets (raw Caddyfile text)
+caddy_site_extra_config: ""
+
+# Path where Caddy looks for site configurations
+caddy_conf_dir: "/etc/caddy/sites"
