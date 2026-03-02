@@ -37,7 +37,7 @@ applications:
       - name: "diagrams"
         domain: "diagrams.internal"
         target_ip: "{{ ansible_host }}"
-        target_port: 8092
+        target_port: 8082
       - name: "excalidraw"
         domain: "excalidraw.internal"
         target_ip: "{{ ansible_host }}"

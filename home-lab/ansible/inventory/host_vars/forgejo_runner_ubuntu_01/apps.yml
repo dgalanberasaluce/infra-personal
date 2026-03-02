@@ -1,6 +1,6 @@
 applications:
-- name: "forgejo_runner_ubuntu_01"
-  role_name: "forgejo-runner"
+  - name: "forgejo_runner_ubuntu_01"
+    role_name: "forgejo-runner"
 
 runner_registration_token: "{{ vault_runner_registration_token }}"
 forgejo_url: "https://forgejo.internal"

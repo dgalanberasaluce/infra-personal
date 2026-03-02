@@ -19,7 +19,7 @@ services:
     # User without root privileges, but with access to `./data`.
     user: 1001:1001
     volumes:
-    - {{ volume_name }}:/data
+      - {{ volume_name }}:/data
     restart: 'unless-stopped'
     command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
 

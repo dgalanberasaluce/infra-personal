@@ -81,7 +81,7 @@ services:
 
 {% if enable_cloudflare_tunnel %}
   cloudflared:
-    image: {{ cloudflare_tunnel_image }} 
+    image: {{ cloudflare_tunnel_image }}
     restart: unless-stopped
     command: tunnel run
     environment:

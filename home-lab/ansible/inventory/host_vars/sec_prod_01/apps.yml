@@ -4,6 +4,7 @@ applications:
     role_name: "authentik"
     domain: "auth.internal"
     target_ip: "{{ ansible_host }}"
+    target_port: 9443
 
 ## Images
 authentik_image: "ghcr.io/goauthentik/server:2026.2.0"

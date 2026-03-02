@@ -1,9 +1,9 @@
 applications:
-- name: "forgejo"
-  role_name: "forgejo-headless"
-  domain: "forgejo.internal"
-  target_ip: "{{ ansible_host }}"
-  target_port: 3000
+  - name: "forgejo"
+    role_name: "forgejo-headless"
+    domain: "forgejo.internal"
+    target_ip: "{{ ansible_host }}"
+    target_port: 3000
 
 forgejo_version: "13.0.4"
 
