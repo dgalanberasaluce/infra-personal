@@ -6,13 +6,12 @@
   "extends": [
     "config:base",
     ":timezone(Europe/Madrid)", 
-    ":semanticCommits" // Uses semantic commits (fix, chore, feat)
-    //":enablePreCommit" // enable if using pre-commit hooks
+    ":semanticCommits"
   ],
 
   "includePaths": [
     "home-lab/**/*.yml",
-    "home-lab/**/*.yaml",
+    "home-lab/**/*.yaml"
   ],
 
   "prCreation": "immediate",
@@ -25,8 +24,10 @@
   "enabledManagers": ["regex"],
   "regexManagers": [
     {
-      "description": "Update image version passed as variable on ansible/playbooks",
-      "fileMatch": ["^home-lab/ansible/playbooks/.*\\.ya?ml$"],
+      "description": "Update image versions inside host-specific apps.yml files",
+      "fileMatch": [
+        "home-lab/inventory/host_vars/[^/]+/apps\\.ya?ml$"
+      ],
       "matchStrings": [
         "(?m)^\\s*(?<variableName>\\w+_image):\\s*['\"]?(?<depName>[^:'\"\\s]+):(?<currentValue>[^\"'\\s]+)['\"]?"
       ],
@@ -37,24 +38,28 @@
 
   "packageRules": [
     {
-      "description": "Group minor and patch updates within the same Ansible playbook into a single PR",
-      "matchFileNames": ["home-lab/ansible/playbooks/**"],
+      "description": "Group minor and patch updates per server (apps.yml file)",
+      "matchFileNames": ["home-lab/inventory/host_vars/**/apps.yml"],
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "Update dependencies in {{{packageFile}}}",
-      "groupSlug": "{{{packageFile}}}"
+      "groupName": "Update applications on {{{packageFile}}}"
     },
     {
-      "description": "Separate minor updates for pre-1.0.0 versions into individual PRs (potential breaking changes)",
+      "description": "Automerge minor and patch updates on stable versions (major >= 1)",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": ">=1.0.0",
+      "automerge": true,
+      "ignoreTests": true
+    },
+    {
+      "description": "Separate minor updates for pre-1.0.0 versions into individual PRs",
       "matchUpdateTypes": ["minor"],
       "matchCurrentVersion": "<1.0.0",
       "groupName": null
     },
     {
-      "description": "Automerge minor and patches updates on stable versions (major > 0)",
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchCurrentVersion": ">=1.0.0",
-      "automerge": true,
-      "ignoreTests": true
+      "description": "Ensure major updates always create separate PRs",
+      "matchUpdateTypes": ["major"],
+      "groupName": null
     }
   ]
 }
