@@ -1,4 +1,0 @@
-- hosts: vaultwarden 
-  roles:
-    - docker_install
-    - vaultwarden
