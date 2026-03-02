@@ -1,8 +1,19 @@
-forgejo_http_port: 3000
+applications:
+- name: "forgejo"
+  role_name: "forgejo-headless"
+  domain: "forgejo.internal"
+  target_ip: "{{ ansible_host }}"
+  target_port: 3000
+
+forgejo_version: "13.0.4"
+
+# App configuration
 forgejo_db_type: "sqlite3"
 forgejo_app_name: "Forgejo"
 forgejo_run_mode: "prod"
+forgejo_http_port: 3000
 
+# secrets
 forgejo_domain: "{{ vault_forgejo_domain }}"
 forgejo_admin_user: "{{ vault_admin_user }}" 
 forgejo_admin_password: "{{ vault_admin_password }}"

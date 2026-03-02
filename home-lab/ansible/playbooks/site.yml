@@ -2,20 +2,20 @@
 # ==============================================================================
 # Base System Configuration
 # ==============================================================================
-# - name: Ensure Base OS and Prerequisites are configured
-#   hosts: all
-#   become: true
-#   tags: [base]
-#   tasks:
+- name: Ensure Base OS and Prerequisites are configured
+  hosts: all
+  become: true
+  tags: [base]
+  tasks:
 #     # - name: "Configure base system (Updates, SSH, standard packages)"
 #     #   ansible.builtin.import_role:
 #     #     name: base_os_setup
 
-#     - name: "Install QEMU Guest Agent (Executes ONLY on Virtual Machines)"
-#       ansible.builtin.import_role:
-#         name: qemu_agent
-#       # skip LXC containers and bare-metal servers
-#       when: ansible_facts["virtualization_type"] in ['kvm', 'vmware']
+    - name: "Install QEMU Guest Agent (Executes ONLY on Virtual Machines)"
+      ansible.builtin.import_role:
+        name: qemu_agent
+      # skip LXC containers and bare-metal servers
+      when: ansible_facts["virtualization_type"] in ['kvm', 'vmware']
 
 # ==============================================================================
 # Docker Hosts & Standard Compose Applications
@@ -42,18 +42,19 @@
 # ==============================================================================
 # Standalone Applications (LXC / Bare Metal)
 # ==============================================================================
-# - name: Deploy Standalone and Headless Applications
-#   hosts: standalone_apps
-#   become: true
-#   tags: [apps, standalone]
-#   tasks:
-#     - name: "Execute custom role for standalone app"
-#       ansible.builtin.include_role:
-#         name: "{{ app_item.role_name }}"
-#       loop: "{{ applications | default([]) }}"
-#       loop_control:
-#         loop_var: app_item
-#       when: app_item.role_name is defined
+- name: Deploy Standalone and Headless Applications
+  hosts: standalone_apps
+  become: true
+  tags: [apps, standalone]
+  tasks:
+    - name: "Execute custom role for standalone app"
+      ansible.builtin.include_role:
+        name: "{{ app_item.role_name }}"
+      loop: "{{ applications | default([]) }}"
+      loop_control:
+        loop_var: app_item
+      when: app_item.role_name is defined
+      tags: [upgrade, install, config]
 
 # # ==============================================================================
 # # Reverse Proxy Configuration
@@ -99,7 +100,7 @@
     - name: "Register DNS records via API for all proxied applications"
       ansible.builtin.include_role:
         name: technitium_dns
-        
+
     # Enable below and comment out above to troubleshoot  
     # - name: "[MOCK] Debug Technitium DNS API payload"
     #   ansible.builtin.debug:
