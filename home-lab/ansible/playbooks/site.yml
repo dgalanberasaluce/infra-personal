@@ -39,6 +39,10 @@
         loop_var: app_item
       tags: [generate_manifests, deploy_apps]
 
+    # - name: "Setup monitoring"
+    #   ansible.builtin.include_role:
+    #     role_name: "monitoring_stack"
+
 # ==============================================================================
 # Standalone Applications (LXC / Bare Metal)
 # ==============================================================================

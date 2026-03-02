@@ -1,0 +1,2 @@
+vaultwarden_domain: "http://localhost"
+vaultwarden_image: "vaultwarden/server:latest"
