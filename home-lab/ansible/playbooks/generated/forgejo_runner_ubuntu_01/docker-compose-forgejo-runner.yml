@@ -2,7 +2,7 @@ services:
   docker-in-docker:
     image: "docker:29.2.1-dind"
     container_name: dind
-    privileged: 'true'
+    privileged: true
     command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
     restart: 'unless-stopped'
 
@@ -19,7 +19,7 @@ services:
     # User without root privileges, but with access to `./data`.
     user: 1001:1001
     volumes:
-    - forgejo-runner-data:/data
+      - forgejo-runner-data:/data
     restart: 'unless-stopped'
     command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
 

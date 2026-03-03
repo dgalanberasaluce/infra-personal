@@ -80,7 +80,7 @@ services:
       - authentik_net
 
   cloudflared:
-    image: cloudflare/cloudflared:2026.2.0 
+    image: cloudflare/cloudflared:2026.2.0
     restart: unless-stopped
     command: tunnel run
     environment:

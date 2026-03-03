@@ -47,7 +47,7 @@
         "home-lab/ansible/inventory/host_vars/**/app.yml"
       ],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchCurrentVersion": "/^[1-9]/",
+      "matchCurrentVersion": "/^v?[1-9]/",
       "groupName": "Update applications on {{{replace 'home-lab/ansible/inventory/host_vars/' '' packageFileDir}}}",
       "automerge": true,
       "ignoreTests": true
