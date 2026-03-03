@@ -14,8 +14,8 @@ Create a new user in Forgejo:
 
 ```js
 module.exports = {
-	platform: 'gitea',
-	endpoint: 'https://example.com/api/v1/', // set this to the url of the forgejo instance
+	platform: 'forgejo',
+	endpoint: 'https://forgejo.internal/api/v1/', // set this to the url of the forgejo instance
 	gitAuthor: 'Renovate Bot <renovatebot@forgejo.internal>', 
 	username: 'renovate-bot',
 	autodiscover: true,
@@ -27,6 +27,22 @@ module.exports = {
 	persistRepoData: true,
 
 	allowCustomCrateRegistries: true, // Allows extensions like .json5. It should be enabled by default
+
+  hostRules:
+	[
+		{
+			hostType: 'docker',
+			matchHost: 'hub.docker.com',
+			username: process.env.DOCKER_HUB_USER,
+			password: process.env.DOCKER_HUB_PASSWORD,
+		},
+		{
+			matchHost: "docker.io",
+			hostType: "docker",
+			username: process.env.DOCKER_HUB_USER,
+			password: process.env.DOCKER_HUB_PASSWORD,
+		},
+	]
 };
 ```
 
@@ -37,18 +53,20 @@ module.exports = {
 name: renovate
 run-name: >-
   ${{ github.event_name == 'schedule' && 'Scheduled Renovate Run' || 
+      github.event_name == 'workflow_dispatch' && github.event.inputs.repository != '' && format('Manual Run for {0} by @{1}', github.event.inputs.repository, github.actor) ||
       github.event_name == 'workflow_dispatch' && format('Manual Run by @{0}', github.actor) || 
       format('Push: {0}', github.event.head_commit.message) }}
 
 on:
-  workflow_dispatch:
-    branches:
-      - main
+  # allows the workflow to be run manually when desired
+  workflow_dispatch: 
+    inputs:
+      repository:
+        description: "Specific repository to scan (ex. org/repo). Leave empty to scan all"
+        required: false
+        type: string
   schedule: 
     - cron: "0 12 * * *"
-  push:
-    branches:
-      - main
 
 jobs:
   renovate:
@@ -56,12 +74,26 @@ jobs:
     container: ghcr.io/renovatebot/renovate:latest
     steps:
       - uses: actions/checkout@v6
-      - run: renovate
+      - name: Run Renovate
+        run: |
+          if [ -n "${{ github.event.inputs.repository }}" ]; then
+            echo "Executing Renovate ONLY for repository: ${{ github.event.inputs.repository }}"
+            export RENOVATE_REPOSITORIES="${{ github.event.inputs.repository }}"
+            export RENOVATE_AUTODISCOVER="false" 
+          fi        
+          renovate
         env:
+          # Error self-signed cert caddy
+          NODE_TLS_REJECT_UNAUTHORIZED: 0
+          GIT_SSL_NO_VERIFY: "true"
+
           RENOVATE_CONFIG_FILE: ${{ forge.workspace }}/config.js
           LOG_LEVEL: "info"
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
           RENOVATE_GITHUB_COM_TOKEN: ${{ secrets.RENOVATE_GITHUB_COM_TOKEN }} # Integration with Github
+
+          DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
+          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
 ```
 
 **Create authentication token:**
@@ -78,7 +110,6 @@ jobs:
 - Add the token as a secret in the `renovate-config` repository:
     - Repository: `renovate-config` > Settings > Actions > Secrets > add Secret
 
-
 ## Integration with Github
 
 **Create `RENOVATE_GITHUB_COM_TOKEN` secret**
@@ -88,6 +119,13 @@ jobs:
     - Token name: `forgejo-renovatebot-public-readonly`
 - Forgejo: > renovate-bot/renovate-config > Settings > Actions > Secrets > add Secret > `RENOVATE_GITHUB_COM_TOKEN`
 
+## Integration with Docker
+
+**Create `DOCKER_HUB_USER` and `DOCKER_HUB_PASSWORD` secrets**
+
+Create token on Docker Hub to avoid rate limiting (`app.docker.com` > Settings > Personal Access Tokens): 
+- Forgejo: > renovate-bot/renovate-config > Settings > Actions > Secrets > add Secret > `DOCKER_HUB_USER`
+- Forgejo: > renovate-bot/renovate-config > Settings > Actions > Secrets > add Secret > `DOCKER_HUB_PASSWORD`
 
 ## Resources
 - [Set up Gitea, Renovate and Komodo](https://nickcunningh.am/blog/how-to-automate-version-updates-for-your-self-hosted-docker-containers-with-gitea-renovate-and-komodo)
