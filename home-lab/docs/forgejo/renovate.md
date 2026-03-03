@@ -104,3 +104,17 @@ jobs:
   "extends": ["config:recommended"],
   //...
 }
+```
+
+## Cheatsheet
+
+Cleanup `forgejo-runner` cache
+```bash
+# Run from forgejo-action-runner
+docker run --rm -v forgejo-runner-data:/data alpine sh -c "rm -rf /data/.cache/act/*"
+```
+
+Update permissions of `forgejo-runner` cache volume to match user id (e.g 1001)
+```bash
+docker run --rm -v forgejo-runner-data:/data alpine sh -c "chown -R 1001:1001 /data
+```
