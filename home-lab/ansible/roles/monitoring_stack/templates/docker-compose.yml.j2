@@ -110,7 +110,7 @@ services:
   alloy:
     image: {{ monitoring_stack_alloy_image }}
     container_name: alloy
-    hostname: "{{ ansible_facts["hostname"] }}"
+    hostname: "{{ inventory_hostname | replace('_', '-') }}"
     restart: unless-stopped
     # Requires privileges to get logs and metrics from host
     user: root

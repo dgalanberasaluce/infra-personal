@@ -1,6 +1,8 @@
 # Docker versions
-authentik_version: "2025.10.3"
-postgres_version: "16-alpine"
+authentik_image: "ghcr.io/goauthentik/server:2025.10.3"
+authentik_postgres_image: "docker.io/library/postgres:16-alpine"
+authentik_redis_image: "docker.io/library/redis:alpine"
+cloudflare_tunnel_image: "cloudflare/cloudflared:latest"
 
 # Authentik Ports
 authentik_port_http: 9000

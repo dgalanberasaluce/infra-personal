@@ -1,0 +1,127 @@
+---
+# ==============================================================================
+# Base System Configuration
+# ==============================================================================
+- name: Ensure Base OS and Prerequisites are configured
+  hosts: all
+  become: true
+  tags: [base]
+  tasks:
+#     # - name: "Configure base system (Updates, SSH, standard packages)"
+#     #   ansible.builtin.import_role:
+#     #     name: base_os_setup
+
+    - name: "Install QEMU Guest Agent (Executes ONLY on Virtual Machines)"
+      ansible.builtin.import_role:
+        name: qemu_agent
+      # skip LXC containers and bare-metal servers
+      when: ansible_facts["virtualization_type"] in ['kvm', 'vmware']
+
+# ==============================================================================
+# Docker Hosts & Standard Compose Applications
+# ==============================================================================
+- name: Provision Docker and Deploy Application Stacks
+  hosts: docker_hosts
+  become: true
+  tags: [apps, docker]
+  tasks:
+    - name: "Set up Docker"
+      ansible.builtin.import_role:
+        name: docker_install
+      tags: install_docker
+
+    - name: "Deploy assigned Docker Compose applications"
+      ansible.builtin.include_role:
+        # Defaults to the compose role if a custom role is not specified in apps.yml
+        name: "{{ app_item.role_name | default('compose_application') }}"
+      loop: "{{ applications | default([]) }}"
+      loop_control:
+        loop_var: app_item
+      tags: [generate_manifests, deploy_apps]
+
+    # - name: "Setup monitoring"
+    #   ansible.builtin.include_role:
+    #     role_name: "monitoring_stack"
+
+# ==============================================================================
+# Standalone Applications (LXC / Bare Metal)
+# ==============================================================================
+- name: Deploy Standalone and Headless Applications
+  hosts: standalone_apps
+  become: true
+  tags: [apps, standalone]
+  tasks:
+    - name: "Execute custom role for standalone app"
+      ansible.builtin.include_role:
+        name: "{{ app_item.role_name }}"
+      loop: "{{ applications | default([]) }}"
+      loop_control:
+        loop_var: app_item
+      when: app_item.role_name is defined
+      tags: [upgrade, install, config]
+
+# # ==============================================================================
+# # Reverse Proxy Configuration
+# # ==============================================================================
+- name: Configure caddyfiles
+  hosts: proxy_servers
+  become: true
+  tags: [proxy]
+  vars:
+    raw_apps: "{{ groups['caddy_managed'] | map('extract', hostvars, 'applications') | select('defined') | flatten }}"
+    single_apps: "{{ raw_apps | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    stack_apps: "{{ raw_apps | selectattr('stack_services', 'defined') | map(attribute='stack_services') | flatten | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    valid_proxied_services: "{{ single_apps + stack_apps }}"
+  tasks:
+    - name: "Update Caddy Configuration"
+      ansible.builtin.include_role:
+        name: caddy_site
+      vars:
+        caddy_site_domain: "{{ app_item.domain }}"
+        caddy_site_upstreams: 
+          - "{{ app_item.target_ip }}:{{ app_item.target_port }}"
+      loop: "{{ valid_proxied_services }}"
+      loop_control:
+        loop_var: app_item
+      tags: [generate_caddyfile, deploy_proxy]
+
+
+# # ==============================================================================
+# # DNS Management
+# # ==============================================================================
+- name: Update Technitium DNS Records
+  hosts: localhost
+  connection: local
+  become: false
+  tags: [dns]
+  vars:
+    raw_apps: "{{ groups['caddy_managed'] | map('extract', hostvars, 'applications') | select('defined') | flatten }}"
+    single_apps: "{{ raw_apps | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    stack_apps: "{{ raw_apps | selectattr('stack_services', 'defined') | map(attribute='stack_services') | flatten | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    valid_proxied_services: "{{ single_apps + stack_apps }}"
+    caddy_proxy_ip: "{{ hostvars['caddy_01']['ansible_host'] }}"
+  tasks:
+    - name: "Register DNS records via API for all proxied applications"
+      ansible.builtin.include_role:
+        name: technitium_dns
+
+    # Enable below and comment out above to troubleshoot  
+    # - name: "[MOCK] Debug Technitium DNS API payload"
+    #   ansible.builtin.debug:
+    #     msg: 
+    #       - "API Endpoint: {{ technitium_api_url }}/api/zones/records/add"
+    #       - "Token: (Hidden for security)"
+    #       - "Target Zone: {{ dns_zone_name }}"
+    #       - "Record Name: {{ dns_record_name }}"
+    #       - "Record Type: {{ dns_record_type }}"
+    #       - "Target IP Value: {{ dns_record_value }}"
+      loop: "{{ valid_proxied_services }}"
+      loop_control:
+        loop_var: app_item
+      vars:
+        technitium_api_url: "{{ global_technitium_api_url }}"
+        technitium_token: "{{ global_technitium_token}}"
+        dns_record_name: "{{ app_item.domain.split('.')[0] }}"
+        dns_zone_name: "{{ app_item.domain.split('.')[1] }}"
+        dns_record_type: "A"
+        dns_record_value: "{{ hostvars['caddy_01']['ansible_host'] }}"

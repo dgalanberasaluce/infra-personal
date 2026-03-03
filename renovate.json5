@@ -6,13 +6,15 @@
   "extends": [
     "config:base",
     ":timezone(Europe/Madrid)", 
-    ":semanticCommits" // Uses semantic commits (fix, chore, feat)
-    //":enablePreCommit" // enable if using pre-commit hooks
+    ":semanticCommits"
   ],
+
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 0,
 
   "includePaths": [
     "home-lab/**/*.yml",
-    "home-lab/**/*.yaml",
+    "home-lab/**/*.yaml"
   ],
 
   "prCreation": "immediate",
@@ -25,10 +27,12 @@
   "enabledManagers": ["regex"],
   "regexManagers": [
     {
-      "description": "Update image version passed as variable on ansible/playbooks",
-      "fileMatch": ["^home-lab/ansible/playbooks/.*\\.ya?ml$"],
+      "description": "Update image versions inside host-specific apps.yml files",
+      "fileMatch": [
+        "home-lab/ansible/inventory/host_vars/[^/]+/apps?\\.ya?ml$"
+      ],
       "matchStrings": [
-        "(?m)^\\s*(?<variableName>\\w+_image):\\s*['\"]?(?<depName>[^:'\"\\s]+):(?<currentValue>[^\"'\\s]+)['\"]?"
+        "(?m)^\\s*(?<variableName>\\w+_image):\\s*['\"]?(?<depName>[^:'\"\\s]+):\\s*(?<currentValue>[^\"'\\s]+)['\"]?"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
@@ -37,24 +41,37 @@
 
   "packageRules": [
     {
-      "description": "Group minor and patch updates within the same Ansible playbook into a single PR",
-      "matchFileNames": ["home-lab/ansible/playbooks/**"],
+      "description": "Group minor and patch updates per server and enable automerge",
+      "matchFileNames": [
+        "home-lab/ansible/inventory/host_vars/**/apps.yml",
+        "home-lab/ansible/inventory/host_vars/**/app.yml"
+      ],
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "Update dependencies in {{{packageFile}}}",
-      "groupSlug": "{{{packageFile}}}"
-    },
-    {
-      "description": "Separate minor updates for pre-1.0.0 versions into individual PRs (potential breaking changes)",
-      "matchUpdateTypes": ["minor"],
-      "matchCurrentVersion": "<1.0.0",
-      "groupName": null
-    },
-    {
-      "description": "Automerge minor and patches updates on stable versions (major > 0)",
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchCurrentVersion": ">=1.0.0",
+      "matchCurrentVersion": "/^[1-9]/",
+      "groupName": "Update applications on {{{replace 'home-lab/ansible/inventory/host_vars/' '' packageFileDir}}}",
       "automerge": true,
       "ignoreTests": true
+    },
+    {
+      "description": "Separate minor updates for 0.x.y versions into individual PRs per application and per file",
+      "matchFileNames": [
+        "home-lab/ansible/inventory/host_vars/**/apps.yml",
+        "home-lab/ansible/inventory/host_vars/**/app.yml"
+      ],
+      "matchUpdateTypes": ["minor"],
+      "matchCurrentVersion": "< 1.0.0",
+      "groupName": "Update {{{depName}}} to minor version on {{{replace 'home-lab/ansible/inventory/host_vars/' '' packageFileDir}}}",
+      "automerge": false
+    },
+    {
+      "description": "Ensure major updates create separate PRs per application AND per file",
+      "matchFileNames": [
+        "home-lab/ansible/inventory/host_vars/**/apps.yml",
+        "home-lab/ansible/inventory/host_vars/**/app.yml"
+      ],
+      "matchUpdateTypes": ["major"],
+      "groupName": "Update {{{depName}}} to major version on {{{replace 'home-lab/ansible/inventory/host_vars/' '' packageFileDir}}}",
+      "automerge": false
     }
   ]
 }

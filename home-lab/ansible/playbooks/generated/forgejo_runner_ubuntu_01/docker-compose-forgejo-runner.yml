@@ -1,13 +1,13 @@
 services:
   docker-in-docker:
-    image: docker:dind
-    container_name: 'docker_dind'
+    image: "docker:29.2.1-dind"
+    container_name: dind
     privileged: 'true'
     command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
     restart: 'unless-stopped'
 
   runner:
-    image: "code.forgejo.org/forgejo/runner:{{ forgejo_runner_version }}"
+    image: "code.forgejo.org/forgejo/runner:12.7.1"
     container_name: 'forgejo-runner'
     links:
       - docker-in-docker
