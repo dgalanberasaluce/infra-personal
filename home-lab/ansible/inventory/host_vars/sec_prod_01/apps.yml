@@ -7,7 +7,7 @@ applications:
     target_port: 9443
 
 ## Images
-authentik_image: "ghcr.io/goauthentik/server:2026.2.0"
+authentik_image: "ghcr.io/goauthentik/server:2026.2.1"
 authentik_postgres_image: "docker.io/library/postgres:16-alpine"
 authentik_redis_image: "docker.io/library/redis:8.6.1-alpine"
 cloudflare_tunnel_image: "cloudflare/cloudflared:2026.2.0"
