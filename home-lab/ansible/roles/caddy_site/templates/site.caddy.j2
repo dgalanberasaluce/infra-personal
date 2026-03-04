@@ -43,7 +43,6 @@
 	reverse_proxy {{ caddy_site_upstreams | join(' ') }} {
 		# Common proxy headers for proper forwarding
 		header_up X-Real-IP {remote_host}
-		header_up X-Forwarded-Proto {scheme}
 	}
 {% endif -%}
 }
