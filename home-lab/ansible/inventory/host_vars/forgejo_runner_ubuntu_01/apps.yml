@@ -6,4 +6,4 @@ runner_registration_token: "{{ vault_runner_registration_token }}"
 forgejo_url: "https://forgejo.internal"
 
 forgejo_runner_image: "code.forgejo.org/forgejo/runner:12.7.1"
-forgejo_runner_dind_image: "docker:29.2.1-dind"
+forgejo_runner_dind_image: "docker:29.3.0-dind"
