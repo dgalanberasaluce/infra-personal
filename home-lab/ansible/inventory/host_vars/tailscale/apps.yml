@@ -1,0 +1,7 @@
+---
+applications:
+- name: "tailscale"
+  role_name: "tailscale"
+
+tailscale_auth_key: "{{ lookup('community.hashi_vault.vault_kv2_get', 'ansible/proxmox/tailscale/secrets', engine_mount_point='secret').data.data.tailscale_key }}"
+tailscale_advertise_routes: "{{ lookup('community.hashi_vault.vault_kv2_get', 'ansible/proxmox/tailscale/secrets', engine_mount_point='secret').data.data.tailscale_advertise_routes }}"

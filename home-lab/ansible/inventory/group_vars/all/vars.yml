@@ -1,2 +1,2 @@
-global_technitium_api_url: "{{ vault_technitium_api_url }}"
-global_technitium_token: "{{ vault_technitium_token }}"
+global_technitium_api_url: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/all/secrets', engine_mount_point='ansible').data.data.technitium_api_url }}"
+global_technitium_token: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/all/secrets', engine_mount_point='ansible').data.data.technitium_token }}"
