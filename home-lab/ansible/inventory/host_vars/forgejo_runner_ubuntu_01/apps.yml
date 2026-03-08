@@ -2,7 +2,7 @@ applications:
   - name: "forgejo_runner_ubuntu_01"
     role_name: "forgejo-runner"
 
-runner_registration_token: "{{ vault_runner_registration_token }}"
+runner_registration_token: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/forgejo-runner-ubuntu-01/secrets', engine_mount_point='ansible').data.data.runner_registration_token }}"
 forgejo_url: "https://forgejo.internal"
 
 forgejo_runner_image: "code.forgejo.org/forgejo/runner:12.7.1"

@@ -1,0 +1,8 @@
+applications:
+  - name: "openbao"
+    role_name: "openbao"
+    domain: "vault.internal"
+    target_ip: "{{ ansible_host }}"
+    target_port: 8200
+
+openbao_image: "openbao/openbao:2.5.0"

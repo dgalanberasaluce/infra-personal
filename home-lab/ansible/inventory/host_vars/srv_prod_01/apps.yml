@@ -127,44 +127,29 @@ paperless_url: "https://paperless.internal"
 # The VAULT_TOKEN environment variable is injected by the GitHub Actions runner.
 # ==============================================================================
 # Tools Stack Secrets
-# bytestash_jwt_secret: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/tools:bytestash_jwt url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# booklore_db_root_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/tools:booklore_root_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# booklore_db_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/tools:booklore_db_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-bytestash_jwt_secret: "{{ vault_bytestash_jwt_secret }}"
-booklore_db_root_password: "{{ vault_booklore_db_root_password }}"
-booklore_db_password: "{{ vault_booklore_db_password }}"
+bytestash_jwt_secret: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.bytestash_jwt_secret }}"
+booklore_db_root_password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.booklore_db_root_password }}"
+booklore_db_password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.booklore_db_password }}"
 
 # # Monitoring Stack Secrets
-# grafana_admin_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/monitoring:grafana_admin_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# pve_exporter_token_value: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/monitoring:pve_exporter_token url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-grafana_admin_password: "{{ vault_grafana_admin_password }}"
-pve_exporter_token_value: "{{ vault_pve_exporter_token_value }}"
+grafana_admin_password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.grafana_admin_password }}"
+pve_exporter_token_value: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.pve_exporter_token_value }}"
 
 
 # # Linkwarden Secrets
-# linkwarden_postgres_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/linkwarden:pg_password url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# linkwaren_meili_key: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/linkwarden:meili_key url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# linkwarden_nextauth_secret: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/linkwarden:nextauth_secret url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-linkwarden_postgres_password: "{{ vault_linkwarden_postgres_password }}"
-linkwaren_meili_key: "{{ vault_linkwarden_meili_key }}"
-linkwarden_nextauth_secret: "{{ vault_linkwarden_nextauth_secret }}"
+linkwarden_postgres_password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.linkwarden_postgres_password }}"
+linkwaren_meili_key: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.linkwarden_meili_key }}"
+linkwarden_nextauth_secret: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.linkwarden_nextauth_secret }}"
 
 # # Paperless Secrets
-# paperless_admin_user: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:admin_user url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# paperless_admin_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:admin_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# paperless_admin_email: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:admin_email url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# paperless_secret_key: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:secret_key url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# paperless_db_user: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:db_user url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-# paperless_db_password: "{{ lookup('hashi_vault', 'secret=secret/data/production/srv_prod_01/paperless:db_pw url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-paperless_admin_user: "{{ vault_paperless_admin_user }}"
-paperless_admin_password: "{{ vault_paperless_admin_password }}"
-paperless_admin_email: "{{ vault_paperless_admin_email }}"
-paperless_secret_key: "{{ vault_paperless_secret_key }}"
-paperless_db_user: "{{ vault_paperless_db_user }}"
-paperless_db_password: "{{ vault_paperless_db_password }}"
+paperless_admin_user: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.paperless_admin_user }}"
+paperless_admin_password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.paperless_admin_password }}"
+paperless_admin_email: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.paperless_admin_email }}"
+paperless_secret_key: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.paperless_secret_key }}"
+paperless_db_user: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.paperless_db_user }}"
+paperless_db_password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.paperless_db_password }}"
 
 # # DNS API Variables (Moved from playbook)
-# technitium_api_url: "http://192.168.8.240:5380"
-# technitium_token: "{{ lookup('hashi_vault', 'secret=secret/data/infrastructure/dns:technitium_api_token url=https://vault.internal token=' + lookup('env', 'VAULT_TOKEN')) }}"
-technitium_api_url: "{{ vault_technitium_api_url }}" # "http://192.168.8.240:5380"
-technitium_token: "{{ vault_technitium_token }}"
+
+technitium_api_url: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.technitium_api_url }}"
+technitium_token: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/srv-prod-01/secrets', engine_mount_point='ansible').data.data.technitium_token }}"

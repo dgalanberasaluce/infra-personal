@@ -43,7 +43,6 @@
   └── ansible.cfg
 ```
 
-
 ## Configuration
 
 Rules:
@@ -53,6 +52,10 @@ Rules:
 The name `site.yml` is a convention for the main playbook that orchestrates the execution of other playbooks. It serves as the entry point for running Ansible tasks and typically includes references to other playbooks, roles, or tasks that need to be executed in a specific order.
 
 **How to run specific components**
+
+>[!NOTE]
+> When using OpenBao, it is required to set `export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` otherwise it will error with `[ERROR]: A worker was found in a dead state`
+
 
 To run only specific components of the Ansible setup without executing the whole thing, we use tags.
 
@@ -76,6 +79,41 @@ Run all except dns and proxy
 ansible-playbook -i inventories/production/hosts.yml playbooks/site.yml
 --skip-tags "dns,proxy"
 ```
+
+Generate docker-compose files for one server using `--limit` (e.g `srv_prod_01`)
+```bash
+ansible-playbook -i ./inventory/hosts.proxmox.yml playbooks/site.yml \
+  --limit srv_prod_01 \
+  --tags generate_manifests
+```
+
+
+Generate docker-compose files for all servers
+```bash
+ansible-playbook -i ./inventory/hosts.proxmox.yml playbooks/site.yml \
+  --tags generate_manifests
+```
+
+Update docker images
+```bash
+ansible-playbook -i ./inventory/hosts.proxmox.yml playbooks/site.yml \
+--tags apps --skip-tags install_docker
+```
+
+Generate Caddyfiles
+```bash
+ansible-playbook -i ./inventory/hosts.proxmox.yml playbooks/site.yml  \
+  --tags "generate_caddyfile"
+```
+
+Generate DNS files
+```bash
+ansible-playbook -i ./inventory/hosts.proxmox.yml playbooks/site.yml \
+  --tags "dns"
+```
+
+
+## Legacy (Using Ansible Vault files)
 
 Generate docker-compose files for one server using `--limit` (e.g `srv_prod_01`)
 ```bash

@@ -1,0 +1,10 @@
+---
+applications:
+  - name: "vaultwarden"
+    role_name: "vaultwarden"
+    domain: "vaultwarden.internal"
+    target_ip: "{{ ansible_host }}"
+    target_port: 8080
+
+vaultwarden_domain: "https://vaultwarden.internal"
+vaultwarden_image: "vaultwarden/server:1.35.4"
