@@ -1,0 +1,52 @@
+services:
+  openbao:
+    image: {{ openbao_image }}
+    container_name: openbao
+    restart: unless-stopped
+    user: "{{ openbao_uid }}:{{ openbao_gid }}"
+    cap_add:
+      - IPC_LOCK
+    environment:
+      - BAO_ADDR=http://127.0.0.1:8200
+      - BAO_API_ADDR=http://127.0.0.1:8200
+    ports:
+      - "{{ openbao_port }}:8200"
+    volumes:
+      - {{ openbao_config_dir }}:/bao/config
+      - openbao-data:/bao/data
+    command: server -config=/bao/config/bao.hcl
+
+{% if openbao_enable_auto_unseal %}
+    unsealer:
+    image: alpine:latest
+    container_name: openbao-unsealer
+    restart: unless-stopped
+    depends_on:
+      - openbao
+    networks:
+      - proxy_net
+    environment:
+      - KEY1=${OPENBAO_UNSEAL_KEY_1}
+      - KEY2=${OPENBAO_UNSEAL_KEY_2}
+      - KEY3=${OPENBAO_UNSEAL_KEY_3}
+      - BAO_API=http://openbao:8200/v1/sys
+    # Script inline: Instala dependencias, chequea el estado y envía las llaves
+    command: >
+      /bin/sh -c "
+        apk add --no-cache curl jq &&
+        while true; do
+          sleep 15;
+          SEALED=\$\$(curl -s \$\$BAO_API/seal-status | jq -r .sealed);
+          if [ \"\$\$SEALED\" = \"true\" ]; then
+            echo '[INFO] OpenBao is sealed. Initiating unseal process...';
+            curl -s -X PUT -d '{\"key\": \"'\$\$KEY1'\"}' \$\$BAO_API/unseal > /dev/null;
+            curl -s -X PUT -d '{\"key\": \"'\$\$KEY2'\"}' \$\$BAO_API/unseal > /dev/null;
+            curl -s -X PUT -d '{\"key\": \"'\$\$KEY3'\"}' \$\$BAO_API/unseal > /dev/null;
+            echo '[OK] Unseal process completed.';
+          fi;
+        done
+      "
+{% endif %}
+
+volumes:
+  openbao-data:

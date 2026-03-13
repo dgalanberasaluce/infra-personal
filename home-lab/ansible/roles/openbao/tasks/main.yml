@@ -1,0 +1,58 @@
+# Generate docker-compose locally
+- name: Ensure local directory exists for generated compose
+  file:
+    path: "generated/{{ inventory_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+- name: Render docker-compose.yml locally
+  template:
+    src: docker-compose.yml.j2
+    dest: "generated/{{ inventory_hostname }}/docker-compose-{{role_name}}.yml"
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+# Remote host
+- name: Ensure directories exist on the host
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ openbao_uid }}"
+    group: "{{ openbao_gid }}"
+    mode: '0700' # Strict permissions for security purposes
+  loop:
+    - "{{ openbao_base_dir }}"
+    - "{{ openbao_config_dir }}"
+
+- name: Generate bao.hcl configuration file
+  ansible.builtin.template:
+    src: bao.hcl.j2
+    dest: "{{ openbao_config_dir }}/bao.hcl"
+    owner: "{{ openbao_uid }}"
+    group: "{{ openbao_gid }}"
+    mode: '0600'
+  notify: Restart OpenBao
+
+- name: Deploy .env file
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "{{ openbao_base_dir }}/.env"
+    mode: '0600'
+
+- name: Deploy docker-compose file to the target remote server
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ openbao_base_dir }}/docker-compose.yml"
+    mode: '0600'
+  notify: Restart OpenBao
+
+- name: Start OpenBao container via Docker Compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ openbao_base_dir }}"
+    state: present
+    pull: missing
+    remove_orphans: true

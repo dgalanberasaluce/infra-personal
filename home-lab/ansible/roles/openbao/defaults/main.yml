@@ -1,0 +1,19 @@
+---
+openbao_image: "openbao/openbao:2.5.0"
+
+openbao_port: 8200
+openbao_ui: "true"
+
+# Rutas en el host
+openbao_base_dir: "/opt/openbao"
+openbao_config_dir: "{{ openbao_base_dir }}/config"
+
+# Usuario y grupo por defecto de la imagen de OpenBao (UID/GID 100)
+openbao_uid: 1000
+openbao_gid: 1000
+
+# Unseal Keys for auto-unseal (if enabled)
+openbao_enable_auto_unseal: false
+openbao_unseal_key_1: ""
+openbao_unseal_key_2: ""
+openbao_unseal_key_3: ""
