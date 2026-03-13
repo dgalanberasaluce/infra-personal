@@ -13,8 +13,11 @@ forgejo_app_name: "Forgejo"
 forgejo_run_mode: "prod"
 forgejo_http_port: 3000
 
+enable_tls: true
+
 # secrets
 forgejo_domain: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/forgejo-lxc/secrets', engine_mount_point='ansible').data.data.forgejo_domain }}"
+forgejo_ssh_domain: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/forgejo-lxc/secrets', engine_mount_point='ansible').data.data.forgejo_ssh_domain }}"
 forgejo_admin_user: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/forgejo-lxc/secrets', engine_mount_point='ansible').data.data.admin_user }}" 
 forgejo_admin_password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/forgejo-lxc/secrets', engine_mount_point='ansible').data.data.admin_password }}"
 forgejo_admin_email: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/forgejo-lxc/secrets', engine_mount_point='ansible').data.data.admin_email }}"

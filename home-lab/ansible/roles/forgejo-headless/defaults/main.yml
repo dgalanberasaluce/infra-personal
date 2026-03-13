@@ -1,2 +1,3 @@
 forgejo_version: "13.0.3"
 forgejo_arch: "linux-amd64"
+enable_tls: false

@@ -16,10 +16,14 @@ SQLITE_JOURNAL_MODE = WAL
 ROOT = {{ forgejo_home }}/data/forgejo-repositories
 
 [server]
-SSH_DOMAIN       = {{ forgejo_domain }}
+SSH_DOMAIN       = {{ forgejo_ssh_domain }}
 DOMAIN           = {{ forgejo_domain }}
 HTTP_PORT        = {{ forgejo_http_port }}
-ROOT_URL         = http://{{ forgejo_domain }}:{{ forgejo_http_port }}/
+{% if enable_tls %}
+    ROOT_URL         = https://{{ forgejo_domain }}/
+{% else %}
+    ROOT_URL         = http://{{ forgejo_domain }}:{{ forgejo_http_port }}/
+{% endif %}
 DISABLE_SSH      = false
 SSH_PORT         = 22
 LFS_START_SERVER = true
