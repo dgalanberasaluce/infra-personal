@@ -21,7 +21,7 @@ services:
 
   diagrams:
     <<: [*common]
-    image: jgraph/drawio:29.5.2
+    image: jgraph/drawio:29.6.1
     container_name: diagrams
     ports:
       - "8082:8080"
@@ -41,7 +41,7 @@ services:
 
   bentopdf-simple:
     <<: [*common]
-    image: ghcr.io/alam00000/bentopdf-simple:2.4.0
+    image: ghcr.io/alam00000/bentopdf-simple:2.5.0
     container_name: bentopdf
     ports:
       - "8084:8080"
@@ -143,7 +143,7 @@ services:
 
   booklore:
     <<: [*common]
-    image: ghcr.io/booklore-app/booklore:v2.0.5
+    image: ghcr.io/booklore-app/booklore:v2.2.0
     container_name: booklore
     environment:
       - USER_ID=${BOOKLORE_APP_USER_ID}

@@ -3,8 +3,14 @@ services:
     image: "{{ forgejo_runner_dind_image }}"
     container_name: dind
     privileged: true
-    command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
+    command: ['dockerd', '-H', 'tcp://0.0.0.0:2375']
+    volumes:
+      - "./dind-config/daemon.json:/etc/docker/daemon.json:ro"
+      - "/etc/ssl/certs:/etc/ssl/certs:ro"
+      - "/run/systemd/resolve/resolv.conf:/etc/resolv.conf:ro"
     restart: 'unless-stopped'
+    ports:
+      - "172.17.0.1:2375:2375"
 
   runner:
     image: "{{ forgejo_runner_image }}"

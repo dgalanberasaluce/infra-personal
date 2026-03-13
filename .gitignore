@@ -100,3 +100,5 @@ terraform.rc
 **/.env
 !templates/**/.env
 *.pem
+
+*/generated/caddy/*

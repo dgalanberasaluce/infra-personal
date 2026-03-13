@@ -1,0 +1,69 @@
+name: Update applications running on docker
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'home-lab/ansible/playbooks/inventory/host_vars/**/*.yml'
+  # Enable for testing
+  # push:
+  #   branches:
+  #     - ci/ansible
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    container:
+      image: forgejo.internal/oci/ansible-runner:latest
+      credentials:
+        username: 'forgejo-cicd'
+        password: ${{ secrets.FORGEJO_CICD_OCI_TOKEN }}
+
+    steps:
+      - name: Download codebase
+        env:
+          GIT_SSL_NO_VERIFY: "true"
+        run: |
+          git clone --branch ${{ github.ref_name }} https://oauth2:${{ github.token }}@forgejo.internal/${{ github.repository }}.git .
+
+      - name: Configure SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}" > ~/.ssh/ansible_id_ed25519
+          chmod 600 ~/.ssh/ansible_id_ed25519
+          echo "StrictHostKeyChecking no" > ~/.ssh/config
+
+      - name: Get OpenBao Token
+        env:
+            VAULT_ADDR: "https://vault.internal"
+            VAULT_SKIP_VERIFY: true
+        run: |
+          JSON_DATA="{\"role_id\":\"${{ secrets.ANSIBLE_BAO_ROLE_ID }}\",\"secret_id\":\"${{ secrets.ANSIBLE_BAO_SECRET_ID }}\"}"
+          TOKEN=$(curl -k -s -X POST -d "$JSON_DATA" ${VAULT_ADDR}/v1/auth/approle/login | jq -r '.auth.client_token')
+  
+          echo "::add-mask::$TOKEN"
+          echo "VAULT_TOKEN=$TOKEN" >> $GITHUB_ENV
+
+      - name: Execute the playbook
+        continue-on-error: true
+        env:
+          VAULT_ADDR: "https://vault.internal"
+          VAULT_SKIP_VERIFY: true
+          DOCKER_HOST: tcp://172.17.0.1:2375
+          ANSIBLE_COLLECTIONS_PATH: /root/.ansible/collections:./collections
+        run: |
+          cd ./home-lab/ansible
+          ansible-playbook -i ./inventory/hosts.proxmox.yml ./playbooks/site.yml --limit 'all:!forgejo_runner_ubuntu_01:!forgejo_lxc' --tags apps --skip-tags install_docker
+
+      - name: Guardar y subir ficheros generados
+        env:
+          GIT_SSL_NO_VERIFY: "true"
+        run: |
+          git config --global user.name "forgejo-cicd"
+          git config --global user.email "forgejo-cicd@forgejo.internal"
+          git diff 
+          
+          git add ./home-lab/ansible/playbooks/generated/**/docker-compose*
+          git diff --quiet && git diff --staged --quiet || (git commit -m "feat(homelab): update generated docker-compose files" && git push)

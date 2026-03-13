@@ -1,0 +1,55 @@
+all:
+  children:
+    proxmox_ubuntu_vms:
+      vars:
+          ansible_user: ansible
+          ansible_private_key_file: "~/.ssh/ansible_id_ed25519"
+      hosts:
+        srv_prod_01:
+          ansible_host: srv-prod-01.nodes.internal
+        srv_prod_02:
+
+          ansible_host: srv-prod-02.nodes.internal
+        forgejo_runner_ubuntu_01:
+          ansible_host: forgejo-runner-ubuntu-01.nodes.internal
+    proxmox_lxcs:
+      vars:
+          ansible_user: ansible
+          ansible_private_key_file: "~/.ssh/ansible_id_ed25519"
+      hosts:
+        caddy_01:
+          ansible_host: proxy.nodes.internal
+        sec_prod_01:
+          ansible_host: sec-prod-01.nodes.internal
+        vaultwarden:
+          ansible_host: vaulwarden.nodes.internal
+        tailscale:
+          ansible_host: tailscale.nodes.internal
+        forgejo_lxc:
+          ansible_host: forgejo.nodes.internal
+        vault_01:
+          ansible_host: vault-01.nodes.internal
+
+  # Grouping hosts by role and function for targeted playbook execution
+    docker_hosts:
+      hosts:
+        srv_prod_01:
+        srv_prod_02:
+        forgejo_runner_ubuntu_01:
+        sec_prod_01:
+        vaultwarden:
+        vault_01:
+    standalone_apps:
+      hosts:
+        tailscale:
+        forgejo_lxc:
+    proxy_servers:
+      hosts:
+        caddy_01:
+    caddy_managed:
+      hosts:
+        srv_prod_01:
+        sec_prod_01:
+        vaultwarden:
+        forgejo_lxc:
+        vault_01:
