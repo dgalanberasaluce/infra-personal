@@ -11,15 +11,18 @@ services:
     restart: 'unless-stopped'
     ports:
       - "172.17.0.1:2375:2375"
+    healthcheck:
+      test: ["CMD", "docker", "info"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   runner:
     image: "{{ forgejo_runner_image }}"
     container_name: 'forgejo-runner'
-    links:
-      - docker-in-docker
     depends_on:
       docker-in-docker:
-        condition: service_started
+        condition: service_healthy
     environment:
       DOCKER_HOST: tcp://docker-in-docker:2375
     # User without root privileges, but with access to `./data`.
@@ -27,7 +30,7 @@ services:
     volumes:
       - {{ volume_name }}:/data
     restart: 'unless-stopped'
-    command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
+    command: ["forgejo-runner", "daemon"]
 
 volumes:
   {{ volume_name }}:
