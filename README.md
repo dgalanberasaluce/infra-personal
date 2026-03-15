@@ -16,6 +16,13 @@ The homelab is built using a combination of the following tools:
 - Ansible: Configuration management and host provisioning
 - Docker / Docker Compose: Application and service orchestration
 
+## Development
+Secret detection setup:
+- `brew install pre-commit gitleaks`
+- Create `.pre-commit-config.yaml`
+- Run `pre-commit install` to set up the pre-commit hooks
+- Create `.gitleaksignore` to specify patterns to ignore during secret detection
+
 ## References
 - https://github.com/JamesTurland/JimsGarage
 - https://github.com/lingrino/infra-personal

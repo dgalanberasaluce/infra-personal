@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: gitleaks-local
+        name: Gitleaks Secret Scanner
+        description: Scans staged changes for secrets using the local gitleaks binary.
+        entry: gitleaks protect --verbose --redact --staged
+        language: system
+        pass_filenames: false
