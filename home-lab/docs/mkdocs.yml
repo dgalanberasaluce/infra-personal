@@ -1,0 +1,41 @@
+site_name: Homelab Docs.
+site_description: Personal homelab documentation
+site_url: "https://homelab.dgalanberasaluce.com"
+
+copyright: Copyright (©) 2026 David Galan Berasaluce
+
+docs_dir: .
+site_dir: site
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: teal
+    accent: lime
+
+repo_url: "https://github.com/dgalanberasaluce/infra-personal"
+repo_name: "Git Repo"
+
+nav:
+  - Home: index.md
+  - Applications:
+    - OpenBao: apps/openbao.md
+  - Configuration Management: ansible/README.md
+  - Core Services:
+    - HTTP Proxy: core/http-proxy.md
+    - Internal DNS: core/internal-dns.md
+  - Forgejo:
+      - Runner: forgejo/forgejo-runner.md
+      - Renovate: forgejo/renovate.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search

@@ -1,4 +1,4 @@
-# HTTP Proxy
+# Caddy HTTP Reverse Proxy
 
 Caddy is configured to act as a reverse proxy for the services running in the home lab. This allows to access them using friendly domain names instead of IP addresses and ports.
 

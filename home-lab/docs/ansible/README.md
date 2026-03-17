@@ -113,7 +113,7 @@ ansible-playbook -i ./inventory/hosts.proxmox.yml playbooks/site.yml \
 ```
 
 
-## Legacy (Using Ansible Vault files)
+## Legacy (Ansible Vault files)
 
 Generate docker-compose files for one server using `--limit` (e.g `srv_prod_01`)
 ```bash
