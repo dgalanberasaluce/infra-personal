@@ -1,0 +1,25 @@
+---
+# This is a static page automatically generated
+{%- set homepage_apps = [] -%}
+
+{% for app in apps %}
+  {% if app.homepage is defined %}
+    {% set _ = homepage_apps.append({
+      'name': app.homepage.name,
+      'group': app.homepage.group | default('Uncategorized'),
+      'description': app.homepage.description | default(''),
+      'icon': app.homepage.icon | default(''),
+      'url': app.homepage.domain | default('https://' ~ app.domain)
+    }) %}
+  {% endif %}
+{% endfor %}
+
+{% for group_name, apps in homepage_apps | groupby('group') %}
+- {{ group_name }}:
+{% for app in apps %}
+    - {{ app.name }}:
+        icon: {{ app.icon }}
+        href: "{{ app.url }}"
+        description: "{{ app.description }}"
+{% endfor %}
+{% endfor %}

@@ -1,0 +1,5 @@
+---
+homepage_install_dir: "/opt/homepage"
+homepage_config_dir: "/opt/homepage/config"
+homepage_port: 3000
+homepage_theme: "dark"

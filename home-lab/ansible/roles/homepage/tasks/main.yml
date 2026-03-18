@@ -1,0 +1,50 @@
+---
+# Generate docker-compose locally
+- name: Ensure local directory exists for generated services
+  file:
+    path: "generated/homepage"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+- name: Render services locally
+  template:
+    src: services.yaml.j2
+    dest: "generated/homepage/services.yml"
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+# - name: Create Homepage directories
+#   ansible.builtin.file:
+#     path: "{{ item }}"
+#     state: directory
+#     mode: '0755'
+#   loop:
+#     - "{{ homepage_install_dir }}"
+#     - "{{ homepage_config_dir }}"
+
+# - name: Deploy Homepage configuration files
+#   ansible.builtin.template:
+#     src: "{{ item }}.j2"
+#     dest: "{{ homepage_config_dir }}/{{ item }}"
+#     mode: '0644'
+#   loop:
+#     - services.yaml
+#     - settings.yaml
+#     - bookmarks.yaml
+#   notify: Restart Homepage
+
+# - name: Deploy docker-compose.yml
+#   ansible.builtin.template:
+#     src: docker-compose.yml.j2
+#     dest: "{{ homepage_install_dir }}/docker-compose.yml"
+#     mode: '0644'
+#   notify: Restart Homepage
+
+# - name: Start Homepage container
+#   community.docker.docker_compose_v2:
+#     project_src: "{{ homepage_install_dir }}"
+#     state: present
