@@ -16,12 +16,22 @@ applications:
     domain: "paperless.internal"
     target_ip: "{{ ansible_host }}"
     target_port: 8000
+    homepage:
+      name: Paperless NGX
+      description: "Document management system with OCR capabilities"
+      group: "Documents"
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/paperless-ngx.svg
 
   - name: "linkwarden"
     role_name: "linkwarden"
     domain: "linkwarden.internal"
     target_ip: "{{ ansible_host }}"
     target_port: 3300
+    homepage:
+      name: Linkwarden
+      description: "Link Management and Bookmarking"
+      group: "Tools"
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/linkwarden.svg
 
   - name: "tools_stack"
     role_name: "tools_stack"

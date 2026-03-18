@@ -125,3 +125,26 @@
         dns_zone_name: "{{ app_item.domain.split('.')[1] }}"
         dns_record_type: "A"
         dns_record_value: "{{ hostvars['caddy_01']['ansible_host'] }}"
+
+
+  # ==============================================================================
+  # Homepage Dashboard Generation
+  # ==============================================================================
+- name: Generate and Deploy Homepage Dashboard
+  hosts: localhost
+  connection: local
+  become: false
+  tags: [homepage]
+  vars:
+    raw_apps: "{{ groups['caddy_managed'] | map('extract', hostvars, 'applications') | select('defined') | flatten }}"
+    single_apps: "{{ raw_apps | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    stack_apps: "{{ raw_apps | selectattr('stack_services', 'defined') | map(attribute='stack_services') | flatten | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
+    apps: "{{ single_apps + stack_apps }}"
+  tasks:
+    # - name: Print the variable in a message
+    #   ansible.builtin.debug:
+    #       var: valid_proxied_services
+    - name: "Execute homepage role to generate dashboard configuration and deploy container"
+      ansible.builtin.include_role:
+        name: homepage
+    
