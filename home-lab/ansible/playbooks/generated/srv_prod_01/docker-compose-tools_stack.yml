@@ -197,7 +197,7 @@ services:
       retries: 10
 
   jotty:
-    image: ghcr.io/fccview/jotty:1.21.0
+    image: ghcr.io/fccview/jotty:1.21.1
     container_name: jotty
     user: "1000:1000"
     ports:
