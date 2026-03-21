@@ -115,7 +115,7 @@ monitoring_stack_cadvisor_image: "ghcr.io/google/cadvisor:0.56.2"
 linkwarden_image: "ghcr.io/linkwarden/linkwarden:v2.13.5"
 
 # Paperless-ngx
-paperless_webserver_image: "ghcr.io/paperless-ngx/paperless-ngx:2.20.11"
+paperless_webserver_image: "ghcr.io/paperless-ngx/paperless-ngx:2.20.13"
 paperless_broker_image: "docker.io/library/redis:8.6.1"
 paperless_db_image: "docker.io/library/postgres:17.9"
 paperless_allowed_hosts: "paperless.internal"
