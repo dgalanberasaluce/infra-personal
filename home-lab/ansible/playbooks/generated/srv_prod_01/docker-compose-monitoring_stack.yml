@@ -67,7 +67,7 @@ services:
   # Proxmox Data Exporter
   # ---------------------------------------------------------
   pve-exporter:
-    image: prompve/prometheus-pve-exporter:3.8.1
+    image: prompve/prometheus-pve-exporter:3.8.2
     restart: unless-stopped
     ports:
       - "9221:9221"
