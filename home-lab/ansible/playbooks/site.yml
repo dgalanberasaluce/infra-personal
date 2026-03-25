@@ -37,11 +37,8 @@
       loop: "{{ applications | default([]) }}"
       loop_control:
         loop_var: app_item
+      when: app_item.role_name | default('compose_application') != 'homepage'
       tags: [generate_manifests, deploy_apps]
-
-    # - name: "Setup monitoring"
-    #   ansible.builtin.include_role:
-    #     role_name: "monitoring_stack"
 
 # ==============================================================================
 # Standalone Applications (LXC / Bare Metal)
@@ -125,26 +122,48 @@
         dns_zone_name: "{{ app_item.domain.split('.')[1] }}"
         dns_record_type: "A"
         dns_record_value: "{{ hostvars['caddy_01']['ansible_host'] }}"
-
-
-  # ==============================================================================
-  # Homepage Dashboard Generation
-  # ==============================================================================
-- name: Generate and Deploy Homepage Dashboard
-  hosts: localhost
-  connection: local
-  become: false
-  tags: [homepage]
+      
+# ==============================================================================
+# Homepage Dashboard
+# ==============================================================================
+- name: Deploy Homepage Instances
+  hosts: docker_hosts
+  become: true
+  tags: [apps, homepage]
   vars:
-    raw_apps: "{{ groups['caddy_managed'] | map('extract', hostvars, 'applications') | select('defined') | flatten }}"
-    single_apps: "{{ raw_apps | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
-    stack_apps: "{{ raw_apps | selectattr('stack_services', 'defined') | map(attribute='stack_services') | flatten | selectattr('domain', 'defined') | selectattr('target_ip', 'defined') | selectattr('target_port', 'defined') | list }}"
-    apps: "{{ single_apps + stack_apps }}"
+    # Aggregate all services from all hosts that have a homepage entry defined.
+    # Both top-level apps and stack_services items are supported.
+    _global_homepage_services: >-
+      {%- set services_list = [] -%}
+      {%- for host in groups['all'] -%}
+        {%- if hostvars[host]['applications'] is defined -%}
+          {%- for app in hostvars[host]['applications'] -%}
+            {%- if app.homepage is defined and app.domain is defined -%}
+              {%- set svc = app.homepage | combine({'href': 'https://' ~ app.domain}) -%}
+              {%- set _ = services_list.append(svc) -%}
+            {%- endif -%}
+            {%- if app.stack_services is defined -%}
+              {%- for stack_svc in app.stack_services -%}
+                {%- if stack_svc.homepage is defined and stack_svc.domain is defined -%}
+                  {%- set svc = stack_svc.homepage | combine({'href': 'https://' ~ stack_svc.domain}) -%}
+                  {%- set _ = services_list.append(svc) -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {{ services_list }}
   tasks:
-    # - name: Print the variable in a message
-    #   ansible.builtin.debug:
-    #       var: valid_proxied_services
-    - name: "Execute homepage role to generate dashboard configuration and deploy container"
+    - name: "Deploy homepage instance"
       ansible.builtin.include_role:
         name: homepage
-    
+      vars:
+        app_name: "{{ app_item.app_name }}"
+        homepage_group: "{{ app_item.homepage_group | default('all') }}"
+        custom_services: "{{ app_item.custom_services | default([]) }}"
+        global_homepage_services: "{{ _global_homepage_services }}"
+      loop: "{{ applications | default([]) | selectattr('role_name', 'equalto', 'homepage') | list }}"
+      loop_control:
+        loop_var: app_item
+      tags: [generate_manifests, deploy_apps]

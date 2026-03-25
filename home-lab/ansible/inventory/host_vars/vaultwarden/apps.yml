@@ -5,6 +5,11 @@ applications:
     domain: "vaultwarden.internal"
     target_ip: "{{ ansible_host }}"
     target_port: 8080
+    homepage:
+      name: Vaultwarden
+      description: "Password Management"
+      group: "Security"
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/vaultwarden.svg
 
 vaultwarden_domain: "https://vaultwarden.internal"
 vaultwarden_image: "vaultwarden/server:1.35.4"

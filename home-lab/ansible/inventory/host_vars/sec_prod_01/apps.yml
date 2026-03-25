@@ -5,6 +5,11 @@ applications:
     domain: "auth.internal"
     target_ip: "{{ ansible_host }}"
     target_port: 9443
+    homepage:
+      name: Authentik
+      description: "Identity and Access Management"
+      group: "Security"
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/authentik.svg
 
 ## Images
 authentik_image: "ghcr.io/goauthentik/server:2026.2.1"

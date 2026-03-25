@@ -1,10 +1,12 @@
 ---
 services:
   homepage:
-    image: ghcr.io/gethomepage/homepage:latest
-    container_name: homepage
+    image: {{ homepage_image }}
+    container_name: "{{ app_item.app_name | default('homepage') }}"
     ports:
       - "{{ homepage_port }}:3000"
     volumes:
       - "{{ homepage_config_dir }}:/app/config"
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: "{{ ansible_default_ipv4.address }}:{{ homepage_port }}"
     restart: unless-stopped
