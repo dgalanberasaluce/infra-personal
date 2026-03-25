@@ -21,7 +21,7 @@ services:
 
   diagrams:
     <<: [*common]
-    image: jgraph/drawio:29.6.1
+    image: jgraph/drawio:29.6.4
     container_name: diagrams
     ports:
       - "8082:8080"
@@ -41,7 +41,7 @@ services:
 
   bentopdf-simple:
     <<: [*common]
-    image: ghcr.io/alam00000/bentopdf-simple:2.5.0
+    image: ghcr.io/alam00000/bentopdf-simple:2.6.0
     container_name: bentopdf
     ports:
       - "8084:8080"
@@ -135,44 +135,44 @@ services:
 #      CRON_MIN: '3,33'
 #      TRUSTED_PROXY: ${FRESHRSS_TRUSTED_PROXY}
 
-  init-booklore:
-    image: busybox
-    command: sh -c "chown -R ${BOOKLORE_APP_USER_ID}:${BOOKLORE_APP_GROUP_ID} /app/data"
-    volumes:
-      - booklore-data:/app/data
+  # init-booklore:
+  #   image: busybox
+  #   command: sh -c "chown -R ${BOOKLORE_APP_USER_ID}:${BOOKLORE_APP_GROUP_ID} /app/data"
+  #   volumes:
+  #     - booklore-data:/app/data
 
-  booklore:
-    <<: [*common]
-    image: ghcr.io/booklore-app/booklore:v2.2.1
-    container_name: booklore
-    environment:
-      - USER_ID=${BOOKLORE_APP_USER_ID}
-      - GROUP_ID=${BOOKLORE_APP_GROUP_ID}
-      - TZ=${BOOKLORE_TZ}
-      - DATABASE_URL=jdbc:mariadb://booklore_mariadb:3306/${BOOKLORE_MYSQL_DATABASE}
-      - DATABASE_USERNAME=${BOOKLORE_DB_USER}
-      - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
-      - BOOKLORE_PORT=${BOOKLORE_PORT}
-      - TELEMETRY_ENABLED=false
-    depends_on:
-      init-booklore:
-        condition: service_completed_successfully
-      booklore_mariadb:
-        condition: service_healthy
-    ports:
-      - "8092:${BOOKLORE_PORT}"
-    volumes:
-      - booklore-data:/app/data
-      - "/opt/tools_stack//booklore/books:/books"
-      - "/opt/tools_stack//booklore/bookdrop:/bookdrop"
-    networks:
-      - booklore_network
-    healthcheck:
-      test: wget -q -O - http://localhost:${BOOKLORE_PORT}/api/v1/healthcheck
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+  # booklore:
+  #   <<: [*common]
+  #   image: ghcr.io/booklore-app/booklore:latest
+  #   container_name: booklore
+  #   environment:
+  #     - USER_ID=${BOOKLORE_APP_USER_ID}
+  #     - GROUP_ID=${BOOKLORE_APP_GROUP_ID}
+  #     - TZ=${BOOKLORE_TZ}
+  #     - DATABASE_URL=jdbc:mariadb://booklore_mariadb:3306/${BOOKLORE_MYSQL_DATABASE}
+  #     - DATABASE_USERNAME=${BOOKLORE_DB_USER}
+  #     - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
+  #     - BOOKLORE_PORT=${BOOKLORE_PORT}
+  #     - TELEMETRY_ENABLED=false
+  #   depends_on:
+  #     init-booklore:
+  #       condition: service_completed_successfully
+  #     booklore_mariadb:
+  #       condition: service_healthy
+  #   ports:
+  #     - "8092:${BOOKLORE_PORT}"
+  #   volumes:
+  #     - booklore-data:/app/data
+  #     - "/opt/tools_stack//booklore/books:/books"
+  #     - "/opt/tools_stack//booklore/bookdrop:/bookdrop"
+  #   networks:
+  #     - booklore_network
+  #   healthcheck:
+  #     test: wget -q -O - http://localhost:${BOOKLORE_PORT}/api/v1/healthcheck
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
 
   booklore_mariadb:
     image: lscr.io/linuxserver/mariadb:11.4.9
@@ -197,7 +197,7 @@ services:
       retries: 10
 
   jotty:
-    image: ghcr.io/fccview/jotty:1.21.0
+    image: ghcr.io/fccview/jotty:1.21.1
     container_name: jotty
     user: "1000:1000"
     ports:

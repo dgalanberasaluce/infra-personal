@@ -135,44 +135,44 @@ services:
 #      CRON_MIN: '3,33'
 #      TRUSTED_PROXY: ${FRESHRSS_TRUSTED_PROXY}
 
-  init-booklore:
-    image: busybox
-    command: sh -c "chown -R ${BOOKLORE_APP_USER_ID}:${BOOKLORE_APP_GROUP_ID} /app/data"
-    volumes:
-      - booklore-data:/app/data
+  # init-booklore:
+  #   image: busybox
+  #   command: sh -c "chown -R ${BOOKLORE_APP_USER_ID}:${BOOKLORE_APP_GROUP_ID} /app/data"
+  #   volumes:
+  #     - booklore-data:/app/data
 
-  booklore:
-    <<: [*common]
-    image: {{ tools_stack_booklore_image }}
-    container_name: booklore
-    environment:
-      - USER_ID=${BOOKLORE_APP_USER_ID}
-      - GROUP_ID=${BOOKLORE_APP_GROUP_ID}
-      - TZ=${BOOKLORE_TZ}
-      - DATABASE_URL=jdbc:mariadb://booklore_mariadb:3306/${BOOKLORE_MYSQL_DATABASE}
-      - DATABASE_USERNAME=${BOOKLORE_DB_USER}
-      - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
-      - BOOKLORE_PORT=${BOOKLORE_PORT}
-      - TELEMETRY_ENABLED=false
-    depends_on:
-      init-booklore:
-        condition: service_completed_successfully
-      booklore_mariadb:
-        condition: service_healthy
-    ports:
-      - "{{ port_booklore }}:${BOOKLORE_PORT}"
-    volumes:
-      - booklore-data:/app/data
-      - "{{ stack_install_dir }}/{{ booklore_dir }}/books:/books"
-      - "{{ stack_install_dir }}/{{ booklore_dir }}/bookdrop:/bookdrop"
-    networks:
-      - booklore_network
-    healthcheck:
-      test: wget -q -O - http://localhost:${BOOKLORE_PORT}/api/v1/healthcheck
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+  # booklore:
+  #   <<: [*common]
+  #   image: {{ tools_stack_booklore_image }}
+  #   container_name: booklore
+  #   environment:
+  #     - USER_ID=${BOOKLORE_APP_USER_ID}
+  #     - GROUP_ID=${BOOKLORE_APP_GROUP_ID}
+  #     - TZ=${BOOKLORE_TZ}
+  #     - DATABASE_URL=jdbc:mariadb://booklore_mariadb:3306/${BOOKLORE_MYSQL_DATABASE}
+  #     - DATABASE_USERNAME=${BOOKLORE_DB_USER}
+  #     - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
+  #     - BOOKLORE_PORT=${BOOKLORE_PORT}
+  #     - TELEMETRY_ENABLED=false
+  #   depends_on:
+  #     init-booklore:
+  #       condition: service_completed_successfully
+  #     booklore_mariadb:
+  #       condition: service_healthy
+  #   ports:
+  #     - "{{ port_booklore }}:${BOOKLORE_PORT}"
+  #   volumes:
+  #     - booklore-data:/app/data
+  #     - "{{ stack_install_dir }}/{{ booklore_dir }}/books:/books"
+  #     - "{{ stack_install_dir }}/{{ booklore_dir }}/bookdrop:/bookdrop"
+  #   networks:
+  #     - booklore_network
+  #   healthcheck:
+  #     test: wget -q -O - http://localhost:${BOOKLORE_PORT}/api/v1/healthcheck
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
 
   booklore_mariadb:
     image: {{ tools_stack_booklore_mariadb_image }}
