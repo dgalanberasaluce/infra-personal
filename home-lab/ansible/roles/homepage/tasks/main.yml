@@ -1,0 +1,97 @@
+---
+# ==============================================================================
+# Filter services for this homepage instance
+# ==============================================================================
+- name: Build service list for this homepage instance
+  ansible.builtin.set_fact:
+    homepage_services: >-
+      {%- set matched = [] -%}
+      {%- for svc in global_homepage_services | default([]) -%}
+        {%- if homepage_group | default('all') == 'all' or (svc.instance is defined and homepage_group in svc.instance) -%}
+          {%- set clean = svc | dict2items | rejectattr('key', 'equalto', 'instance') | list | items2dict -%}
+          {%- set _ = matched.append(clean) -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- for svc in custom_services | default([]) -%}
+        {%- set _ = matched.append(svc) -%}
+      {%- endfor -%}
+      {{ matched }}
+  tags: [generate_manifests, deploy_apps]
+
+# ==============================================================================
+# Generate services manifest locally
+# ==============================================================================
+- name: Ensure local directory exists for generated services
+  ansible.builtin.file:
+    path: "generated/homepage/{{ app_name }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+- name: Render services locally
+  ansible.builtin.template:
+    src: services.yaml.j2
+    dest: "generated/homepage/{{ app_name }}/services.yml"
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+- name: Ensure local directory exists for generated compose
+  file:
+    path: "generated/{{ inventory_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+- name: Render docker-compose.yaml locally
+  template:
+    src: docker-compose.yaml.j2
+    dest: "generated/{{ inventory_hostname }}/docker-compose-{{role_name}}-{{app_name}}.yml"
+  delegate_to: localhost
+  become: false
+  tags: [generate_manifests]
+
+# ==============================================================================
+# Deploy to remote host
+# ==============================================================================
+- name: Create Homepage directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ homepage_install_dir }}"
+    - "{{ homepage_config_dir }}"
+  tags: [deploy_apps]
+
+- name: Deploy Homepage configuration files
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ homepage_config_dir }}/{{ item }}"
+    mode: '0644'
+  loop:
+    - services.yaml
+    - settings.yaml
+    - bookmarks.yaml
+  notify: Restart Homepage
+  tags: [deploy_apps]
+
+- name: Deploy docker-compose.yaml
+  ansible.builtin.template:
+    src: docker-compose.yaml.j2
+    dest: "{{ homepage_install_dir }}/docker-compose.yaml"
+    mode: '0644'
+  notify: Restart Homepage
+  tags: [deploy_apps]
+
+- name: Start Homepage container
+  community.docker.docker_compose_v2:
+    project_src: "{{ homepage_install_dir }}"
+    project_name: "{{ app_name }}"
+    state: present
+    pull: missing
+  tags: [deploy_apps]

@@ -1,0 +1,12 @@
+---
+homepage_install_dir: "/opt/{{ app_name | default('homepage') }}"
+homepage_config_dir: "/opt/{{ app_name | default('homepage') }}/config"
+homepage_port: "{{ app_item.target_port | default(3000) }}"
+homepage_theme: "dark"
+
+global_homepage_services: []
+homepage_group: "all"
+custom_services: []
+homepage_services: []
+
+homepage_image: ghcr.io/gethomepage/homepage:latest

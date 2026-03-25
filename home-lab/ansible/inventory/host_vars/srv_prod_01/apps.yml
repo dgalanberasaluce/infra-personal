@@ -5,23 +5,221 @@
 # ==============================================================================
 applications:
 
+  ###################################
+  # Homepage
+  ###################################
+  - app_name: "homepage"
+    role_name: "homepage"
+    domain: "home.internal"
+    target_ip: "{{ ansible_host }}"
+    target_port: 3001
+    homepage_group: "all"
+    custom_services:
+      - name: "Proxmox"
+        group: "Infrastructure"
+        href: "https://proxmox.internal:8006"
+        description: "Proxmox Virtual Environment"
+        icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/proxmox.svg"
+
+      - name: Technitium DNS
+        description: Technitium DNS Server 01
+        group: DNS
+        icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/technitium.webp"
+        href: "http://dns.internal:5380"
+
+      - name: caddy
+        group: Network
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/caddy.svg
+        description: HTTP Reverse Proxy (NO UI)
+        href: ""
+      - name: Uptime Kuma
+        group: Network
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/uptime-kuma.svg
+        description: Uptime Monitoring
+        href: ""
+      - name: Uptime Robot
+        group: Network
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/uptimerobot.svg
+        description: Uptime Monitoring
+        href: ""
+      - name: OpenSpeedTest
+        group: Network
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openspeedtest.svg
+        description: Speed Test
+        href: ""
+
+      - name: Victoria Metrics
+        group: Monitoring
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/victoriametrics.svg
+        description: Time series Database
+        href: ""
+      - name: Grafana Loki
+        group: Monitoring
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/loki.svg
+        href: ""
+        description: Log Storage
+      - name: Scrutiny
+        group: Monitoring
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/scrutiny.svg
+        href: ""
+        description: Drive Health
+
+      - name: TrueNAS
+        group: Storage
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/truenas.svg
+        href: ""
+        description: NAS Storage
+      - name: RustFS
+        group: Storage
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/rustfs.svg
+        href: ""
+        description: Object Storage
+      - name: MinIO
+        group: Storage
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/minio.svg
+        href: ""
+        description: Object Storage (Archived)
+
+      - name: Tailscale
+        description: VPN and Remote Access
+        group: Remote Access
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/tailscale.svg
+        href: "https://login.tailscale.com"
+      - name: Code Server
+        group: Remote Access
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/code-server.webp
+        href: ""
+        description: VSCode in the browser
+
+      - name: pgAdmin
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/pgadmin.svg
+        href: ""
+        group: Databases
+        description: PostgreSQL Management
+      - name: Adminer
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/adminer.svg
+        href: ""
+        group: Databases
+        description: Database Management
+      - name: Mongo Express
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/mongodb.svg
+        href: ""
+        group: Databases
+        description: MongoDB Management
+      - name: phpMyAdmin
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/phpmyadmin.svg
+        href: ""
+        group: Databases
+        description: MySQL Management
+      - name: DBgate
+        icon: /icons/dbgate.png
+        href: ""
+        group: Databases
+        description: Database Management
+      - name: Databasus
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/databasus.svg
+        href: ""
+        group: Databases
+        description: Database Management
+      - name: Adminer
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/adminer.svg
+        href: ""
+        group: Databases
+        description: Database Management
+
+      - name: Wazuh
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/wazuh.svg
+        href: ""
+        group: Security
+        description: "Security Information and Event Management (SIEM)"
+      - name: Opnsense
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/opnsense.svg
+        href: ""
+        group: Security
+        description: Firewall and Network Security
+
+      - name: BookStack
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/bookstack.svg
+        href: ""
+        group: Documents
+        description: Wiki and Documentation
+
+      - name: Rancher
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/rancher.svg
+        href: ""
+        group: Containers
+        description: Kubernetes
+      - name: Dozzle
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/dozzle.svg
+        href: ""
+        group: Containers
+        description: Container Logs
+
+      - name: Jellyfin
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/jellyfin.svg
+        href: ""
+        group: Media
+        description: Media Server
+      - name: Immich
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/immich.svg
+        href: ""
+        group: Media
+        description: Photo Management
+      - name: Plex
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/plex.svg
+        href: ""
+        group: Media
+        description: Media Server
+      - name: Tautulli
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/tautulli.svg
+        href: ""
+        group: Media
+        description: Plex Analytics
+
+  - app_name: "homepage-02"
+    role_name: "homepage"
+    domain: "home-monitoring.internal"
+    target_ip: "{{ ansible_host }}"
+    target_port: 3002
+    homepage_group: "monitoring"
+
+  ########################################################
+  # Other Applications
+  ########################################################
   - name: "monitoring"
     role_name: "monitoring_stack"
     domain: "grafana.internal"
     target_ip: "{{ ansible_host }}"
     target_port: 3000
+    homepage:
+      name: Grafana
+      description: "Data visualization and monitoring platform"
+      group: "Monitoring"
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grafana.svg
+      instance:
+        - monitoring
 
   - name: "paperless"
     role_name: "paperless_ngx"
     domain: "paperless.internal"
     target_ip: "{{ ansible_host }}"
     target_port: 8000
+    homepage:
+      name: Paperless NGX
+      description: "Document management system with OCR capabilities"
+      group: "Documents"
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/paperless-ngx.svg
 
   - name: "linkwarden"
     role_name: "linkwarden"
     domain: "linkwarden.internal"
     target_ip: "{{ ansible_host }}"
     target_port: 3300
+    homepage:
+      name: Linkwarden
+      description: "Link Management and Bookmarking"
+      group: "Tools"
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/linkwarden.webp
 
   - name: "tools_stack"
     role_name: "tools_stack"
@@ -30,46 +228,101 @@ applications:
         domain: "ittools.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8080
+        homepage:
+          name: it-tools
+          description: "IT Tools and Utilities"
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/it-tools.svg
       - name: "cyberchef"
         domain: "cyberchef.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8081
+        homepage:
+          name: cyberchef
+          description: ""
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/cyberchef.svg
       - name: "diagrams"
         domain: "diagrams.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8082
+        homepage:
+          name: diagrams
+          description: ""
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/diagrams-net.svg
       - name: "excalidraw"
         domain: "excalidraw.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8083
+        homepage:
+          name: excalidraw
+          description: ""
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/excalidraw.svg
       - name: "bentopdf"
         domain: "bentopdf.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8084
+        homepage:
+          name: bentopdf
+          description: ""
+          group: "PDF Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/bentopdf.svg
       - name: "plantuml"
         domain: "plantuml.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8085
+        homepage:
+          name: plantuml
+          description: ""
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/plantuml.svg
       - name: "mermaid"
         domain: "mermaid.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8086
+        homepage:
+          name: mermaid
+          description: ""
+          group: "Tools"
+          icon: ""
       - name: "convertx"
         domain: "convertx.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8087
+        homepage:
+          name: convertx
+          description: ""
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/convertx.webp
       - name: "omni-tools"
         domain: "omni-tools.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8088
+        homepage:
+          name: Omni Tools
+          description: IT Tools and Utilities
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/omni-tools.webp
       - name: "bytestash"
         domain: "bytestash.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8089
+        homepage:
+          name: bytestash
+          description: "Code snippet manager"
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/bytestash.svg
       - name: "memos"
         domain: "memos.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8090
+        homepage:
+          name: memos
+          description: "Note Taking and Personal Knowledge Management"
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/memos.svg
       - name: "freshrss"
         domain: "freshrss.internal"
         target_ip: "{{ ansible_host }}"
@@ -78,10 +331,20 @@ applications:
       #   domain: "booklore.internal"
       #   target_ip: "{{ ansible_host }}"
       #   target_port: 8092
+      #   homepage:
+      #    name: booklore
+      #    description: "Book and Reading Management"
+      #    group: "Documents"
+      #    icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/booklore.svg
       - name: "jotty"
         domain: "jotty.internal"
         target_ip: "{{ ansible_host }}"
         target_port: 8093
+        homepage:
+          name: jotty
+          description: "Note Taking and Personal Knowledge Management"
+          group: "Tools"
+          icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/jotty.svg
 
 # ==============================================================================
 # 2. IMAGE VERSIONS & CONFIGURATIONS (Public/Safe GitOps Data)

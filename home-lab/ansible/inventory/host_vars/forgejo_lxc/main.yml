@@ -4,6 +4,13 @@ applications:
     domain: "forgejo.internal"
     target_ip: "{{ ansible_host }}"
     target_port: 3000
+    homepage:
+      name: Forgejo
+      description: Git Repositories
+      group: Storage
+      icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/forgejo.svg
+
+
 
 forgejo_version: "13.0.4"
 
