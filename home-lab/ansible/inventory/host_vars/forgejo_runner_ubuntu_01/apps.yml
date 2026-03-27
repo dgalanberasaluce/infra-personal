@@ -6,4 +6,4 @@ runner_registration_token: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pr
 forgejo_url: "https://forgejo.internal"
 
 forgejo_runner_image: "code.forgejo.org/forgejo/runner:12.7.2"
-forgejo_runner_dind_image: "docker:29.3.0-dind"
+forgejo_runner_dind_image: "docker:29.3.1-dind"
