@@ -24,7 +24,7 @@ services:
   # LOGS
   # ---------------------------------------------------------
   loki:
-    image: grafana/loki:3.6
+    image: grafana/loki:3.7
     container_name: loki
     restart: unless-stopped
     volumes:
