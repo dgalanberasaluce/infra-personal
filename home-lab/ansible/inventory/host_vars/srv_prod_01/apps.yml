@@ -352,7 +352,7 @@ applications:
 # Tools Stack
 tools_stack_it_tools_image: "corentinth/it-tools:2024.10.22-7ca5933"
 tools_stack_cyberchef_image: "ghcr.io/gchq/cyberchef:10.22.1"
-tools_stack_drawio_image: "jgraph/drawio:29.6.6"
+tools_stack_drawio_image: "jgraph/drawio:29.6.7"
 tools_stack_bentopdf_image: "ghcr.io/alam00000/bentopdf-simple:2.7.0"
 tools_stack_plantuml_image: "plantuml/plantuml-server:v1.2026.2"
 tools_stack_convertx_image: "ghcr.io/c4illin/convertx:latest"
@@ -368,7 +368,7 @@ tools_stack_jotty_image: "ghcr.io/fccview/jotty:1.21.1"
 monitoring_role: "server"
 monitor_docker: true
 monitoring_stack_alloy_image: "grafana/alloy:v1.15.0"
-monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.138.0-scratch"
+monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.139.0-scratch"
 monitoring_stack_loki_image: "grafana/loki:3.7"
 monitoring_stack_grafana_image: "grafana/grafana:12.4.2"
 monitoring_stack_pve_exporter_image: "prompve/prometheus-pve-exporter:3.8.2"
