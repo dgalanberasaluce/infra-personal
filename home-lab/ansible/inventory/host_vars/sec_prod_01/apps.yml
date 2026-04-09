@@ -12,7 +12,7 @@ applications:
       icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/authentik.svg
 
 ## Images
-authentik_image: "ghcr.io/goauthentik/server:2026.2.1"
+authentik_image: "ghcr.io/goauthentik/server:2026.2.2"
 authentik_postgres_image: "docker.io/library/postgres:16-alpine"
 authentik_redis_image: "docker.io/library/redis:8.6.2-alpine"
 cloudflare_tunnel_image: "cloudflare/cloudflared:2026.3.0"
