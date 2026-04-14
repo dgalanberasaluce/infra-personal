@@ -368,7 +368,7 @@ tools_stack_jotty_image: "ghcr.io/fccview/jotty:1.21.1"
 monitoring_role: "server"
 monitor_docker: true
 monitoring_stack_alloy_image: "grafana/alloy:v1.15.0"
-monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.139.0-scratch"
+monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.140.0-scratch"
 monitoring_stack_loki_image: "grafana/loki:3.7"
 monitoring_stack_grafana_image: "grafana/grafana:12.4.2"
 monitoring_stack_pve_exporter_image: "prompve/prometheus-pve-exporter:3.8.2"
