@@ -40,7 +40,7 @@ services:
   # Data Visualization
   # ---------------------------------------------------------
   grafana:
-    image: grafana/grafana:12.4.2
+    image: grafana/grafana:12.4.3
     container_name: grafana
     restart: unless-stopped
     ports:
@@ -100,7 +100,7 @@ services:
       - monitoring
 
   alloy:
-    image: grafana/alloy:v1.15.0
+    image: grafana/alloy:v1.15.1
     container_name: alloy
     hostname: "srv-prod-01"
     restart: unless-stopped
