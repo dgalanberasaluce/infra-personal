@@ -12,4 +12,4 @@ applications:
       icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/vaultwarden.svg
 
 vaultwarden_domain: "https://vaultwarden.internal"
-vaultwarden_image: "vaultwarden/server:1.35.6"
+vaultwarden_image: "vaultwarden/server:1.35.7"
