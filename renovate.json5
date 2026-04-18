@@ -14,7 +14,8 @@
 
   "includePaths": [
     "home-lab/**/*.yml",
-    "home-lab/**/*.yaml"
+    "home-lab/**/*.yaml",
+    "terraform-modules/**/*.tf"
   ],
 
   "prCreation": "immediate",
@@ -24,7 +25,7 @@
     "renovate"
   ],
 
-  "enabledManagers": ["regex"],
+  "enabledManagers": ["regex", "terraform"],
   "regexManagers": [
     {
       "description": "Update image versions inside host-specific apps.yml files",
@@ -73,6 +74,29 @@
       "matchUpdateTypes": ["major"],
       "groupName": "Update {{{depName}}} to major version on {{{replace 'home-lab/ansible/inventory/host_vars/' '' packageFileDir}}}",
       "automerge": false
+    },
+    {
+      "description": "Terraform providers at 0.x.y: one PR per provider per terraform module",
+      "matchManagers": ["terraform"],
+      "matchCurrentVersion": "< 1.0.0",
+      "automerge": false
+    },
+    {
+      "description": "Terraform providers major version bump: one grouped PR per terraform module affected",
+      "matchManagers": ["terraform"],
+      "matchUpdateTypes": ["major"],
+      "matchCurrentVersion": ">= 1.0.0",
+      "groupName": "Terraform major provider updates in {{{packageFileDir}}}",
+      "automerge": false
+    },
+    {
+      "description": "Terraform providers minor/patch on stable (>= 1.0.0): automerge after 1 day",
+      "matchManagers": ["terraform"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": ">= 1.0.0",
+      "minimumReleaseAge": "1 day",
+      "automerge": true,
+      "ignoreTests": true
     }
   ]
 }
