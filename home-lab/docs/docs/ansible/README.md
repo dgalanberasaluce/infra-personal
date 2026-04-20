@@ -112,6 +112,51 @@ ansible-playbook -i ./inventory/hosts.proxmox.yml playbooks/site.yml \
   --tags "dns"
 ```
 
+## Ansible tags
+
+**Notes:**
+- Prevent **tag bleeding**: when tags applied to a parent structure are inherited by child tasks
+- `always` is a special, built-in keyword that ensures a task or play runs during every execution, even if other tags are skipped or specific tags are selected via `--tags`
+  - Prevent it to run using `--skip-tags always` 
+```yaml
+# Usage
+tasks:
+- name: Always run
+  tags: [always]
+```
+
+**Recommendations**
+1. **Play-level tags**
+- Every task inside the play inherits the tags
+- Best practice: use play-level for infrastructure categories (proxy, docker, k8s,...)
+
+2. **The gatekeeper pattern**
+- `include_role`
+- `import_role`
+
+**direct tag**
+
+```yaml
+tags: [...]
+```
+
+Allow the loop/input to start if **either** tag is called
+
+
+**apply**
+
+`apply` force the tag onto every task inside the role. Only use `apply` for tags that must run for the role to work
+
+```yaml
+apply:
+  tags: [...]
+```
+
+3. **Task-level tag**
+- Give level task a unique task
+- Never task for dangerous tasks (e.g database wipes or reboots)
+
+
 
 ## Legacy (Ansible Vault files)
 
