@@ -4,7 +4,7 @@ services:
   # TSDB
   # ---------------------------------------------------------
   victoriametrics:
-    image: victoriametrics/victoria-metrics:v1.140.0-scratch
+    image: victoriametrics/victoria-metrics:v1.141.0-scratch
     container_name: victoriametrics
     restart: unless-stopped
     security_opt:
