@@ -49,9 +49,7 @@
       "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "/^v?[1-9]/",
       "groupName": "Update applications on {{{replace 'home-lab/ansible/inventory/host_vars/' '' packageFileDir}}}",
-      "automerge": true,
-      "ignoreTests": true,
-      "minimumReleaseAge": "1 day"
+      "automerge": false,
     },
     {
       "description": "Separate minor updates for 0.x.y versions into individual PRs per application and per file",
