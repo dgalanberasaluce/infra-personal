@@ -15,7 +15,7 @@ services:
     image: {{ tools_stack_cyberchef_image }}
     container_name: cyberchef
     ports:
-      - "{{ port_cyberchef }}:80"
+      - "{{ port_cyberchef }}:8080"
     volumes:
       - cyberchef-data:/var/lib/cyberchef:rw
 
