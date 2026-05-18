@@ -12,10 +12,10 @@ applications:
       icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/authentik.svg
 
 ## Images
-authentik_image: "ghcr.io/goauthentik/server:2026.2.2"
+authentik_image: "ghcr.io/goauthentik/server:2026.2.3"
 authentik_postgres_image: "docker.io/library/postgres:16-alpine"
 authentik_redis_image: "docker.io/library/redis:8.6.3-alpine"
-cloudflare_tunnel_image: "cloudflare/cloudflared:2026.3.0"
+cloudflare_tunnel_image: "cloudflare/cloudflared:2026.5.0"
 
 ## Authentik configuration
 authentik_secret_key: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/sec-prod-01/secrets', engine_mount_point='ansible').data.data.authentik_secret }}"
