@@ -1,0 +1,58 @@
+services:
+  grimmory:
+    image: ghcr.io/grimmory-tools/grimmory:v3.2.0
+    container_name: grimmory
+    environment:
+      - USER_ID=2001
+      - GROUP_ID=2001
+      - TZ=${GRIMMORY_TZ}
+      - DATABASE_URL=jdbc:mariadb://mariadb:3306/${GRIMMORY_MYSQL_DATABASE}
+      - DATABASE_USERNAME=${GRIMMORY_DB_USER}
+      - DATABASE_PASSWORD=${GRIMMORY_DB_PASSWORD}
+      - SWAGGER_ENABLED=false
+      - FORCE_DISABLE_OIDC=false
+      # ALLOWED_ORIGINS=
+      # Override JVM memory defaults (the image ships sensible defaults for ~512 MB heap).
+      # Uncomment and adjust if you want a tighter or looser cap:
+      # JAVA_TOOL_OPTIONS=-Xmx256m
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "6060:6060"
+    volumes:
+      - grimmory-data:/app/data
+      - /opt/grimmory/grimmory/books:/books
+      - /opt/grimmory/grimmory/bookdrop:/bookdrop
+    networks:
+      - grimmory_network
+    restart: unless-stopped
+
+  mariadb:
+    image: lscr.io/linuxserver/mariadb:11.4.8
+    environment:
+      - PUID=2002
+      - PGID=2002
+      - TZ=${GRIMMORY_TZ}
+      - MYSQL_ROOT_PASSWORD=${GRIMMORY_MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${GRIMMORY_MYSQL_DATABASE}
+      - MYSQL_USER=${GRIMMORY_DB_USER}
+      - MYSQL_PASSWORD=${GRIMMORY_DB_PASSWORD}
+    volumes:
+      - grimmory-mariadb:/config
+    networks:
+      - grimmory_network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+    grimmory-data:
+    grimmory-mariadb:
+
+networks:
+  grimmory_network:
+    driver: bridge
