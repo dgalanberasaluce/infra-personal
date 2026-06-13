@@ -1,0 +1,13 @@
+services:
+  jotty:
+    image: {{ jotty_image }}
+    container_name: jotty
+    user: "{{ uid }}:{{ gid }}"
+    ports:
+      - "{{jotty_app_port}}:3000"
+    volumes:
+      - "{{ app_dir }}/data:/app/data:rw"
+      - "{{ app_dir }}/config:/app/config:rw"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production

@@ -2,6 +2,7 @@ locals {
   ostemplates = {
     "ubuntu-24.04" = "ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
     "debian-12"    = "debian-12-standard_12.0-1_amd64.tar.gz"
+    "debian-13"    = "debian-13-standard_13.1-2_amd64.tar.zst"
     "centos-8"     = "centos-8-standard_8.3-1_amd64.tar.gz"
     "alpine-3.22"  = "alpine-3.22-default_20250617_amd64.tar.xz"
   }

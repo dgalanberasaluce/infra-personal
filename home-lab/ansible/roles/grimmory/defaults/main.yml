@@ -1,0 +1,27 @@
+# Set up directory for Grimmory
+grimmory_dir: "/opt/grimmory"
+
+grimmory_folders:
+  - name: "grimmory/books"
+    owner: "srv-grimmory-app"
+  - name: "grimmory/bookdrop"
+    owner: "srv-grimmory-app"
+
+# Docker Image
+grimmory_image: "ghcr.io/grimmory-tools/grimmory:latest"
+grimmory_mariadb_image: "lscr.io/linuxserver/mariadb:11.4.8"
+
+# Docker configuration
+grimmory:
+  user_id: 2001
+  group_id: 2001
+  tag: "app"
+
+database:
+  db_user_id: 2002
+  db_group_id: 2002
+  tag: "db"
+
+# App configuration
+grimmory_db_root_password: "CHANGE_ME"
+grimmory_db_password: "CHANGE_ME"

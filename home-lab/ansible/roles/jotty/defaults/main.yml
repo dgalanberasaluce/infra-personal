@@ -1,0 +1,18 @@
+jotty_image: "ghcr.io/fccview/jotty:latest"
+app_dir: "/opt/jotty"
+jotty_app_port: "3000"
+
+app_folders:
+  - name: data
+    owner: "ansible"
+  - name: config
+    owner: "ansible"
+  - name: cache
+    owner: "ansible"
+
+jotty_uid: 2001
+jotty_gid: 2001
+
+## Ansible
+uid: "{{ jotty_uid }}"
+gid: "{{ jotty_gid }}"

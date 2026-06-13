@@ -1,0 +1,60 @@
+---
+# ==============================================================================
+# APPLICATION ROUTING & DNS
+# proxy-server (caddy) and dns-server (technitium) roles will iterate dynamically over this list.
+# ==============================================================================
+applications:
+  - name: "tools_stack"
+    role_name: "tools_stack"
+    stack_services:
+      - name: "it-tools"
+        domain: "ittools.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8080
+      - name: "cyberchef"
+        domain: "cyberchef.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8081
+      - name: "diagrams"
+        domain: "diagrams.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8082
+      - name: "excalidraw"
+        domain: "excalidraw.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8083
+      - name: "bentopdf"
+        domain: "bentopdf.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8084
+      - name: "plantuml"
+        domain: "plantuml.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8085
+      - name: "mermaid"
+        domain: "mermaid.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8086
+      - name: "convertx"
+        domain: "convertx.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8087
+      - name: "omni-tools"
+        domain: "omni-tools.internal"
+        target_ip: "{{ ansible_host }}"
+        target_port: 8088
+
+# ==============================================================================
+# IMAGE VERSIONS & CONFIGURATIONS
+# ==============================================================================
+# Tools Stack
+tools_stack_it_tools_image: "corentinth/it-tools:2024.10.22-7ca5933"
+tools_stack_cyberchef_image: "ghcr.io/gchq/cyberchef:11.0.0"
+tools_stack_drawio_image: "jgraph/drawio:29.7.9"
+tools_stack_bentopdf_image: "ghcr.io/alam00000/bentopdf-simple:2.8.4"
+tools_stack_plantuml_image: "plantuml/plantuml-server:v1.2026.2"
+tools_stack_convertx_image: "ghcr.io/c4illin/convertx:latest"
+tools_stack_omni_tools_image: "iib0011/omni-tools:0.6"
+
+technitium_api_url: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/all/secrets', engine_mount_point='ansible').data.data.technitium_api_url }}"
+technitium_token: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/all/secrets', engine_mount_point='ansible').data.data.technitium_token }}"

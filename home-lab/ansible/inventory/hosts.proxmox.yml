@@ -28,6 +28,8 @@ all:
           ansible_host: forgejo.nodes.internal
         vault_01:
           ansible_host: vault-01.nodes.internal
+        tools_lxc:
+          ansible_host: tools.nodes.internal
 
   # Grouping hosts by role and function for targeted playbook execution
     docker_hosts:
@@ -38,6 +40,7 @@ all:
         sec_prod_01:
         vaultwarden:
         vault_01:
+        tools_lxc:
     standalone_apps:
       hosts:
         tailscale:
@@ -52,3 +55,4 @@ all:
         vaultwarden:
         forgejo_lxc:
         vault_01:
+        tools_lxc:

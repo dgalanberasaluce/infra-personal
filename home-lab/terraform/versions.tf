@@ -16,14 +16,14 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint = "https://proxmox.internal.local:8006"
+  endpoint = "https://proxmox-01.internal.local:8006"
   insecure = true
 
   api_token = "${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
 }
 
 provider "telmate" {
-  pm_api_url      = "https://proxmox.internal.local:8006/api2/json"
+  pm_api_url      = "https://proxmox-01.internal.local:8006/api2/json"
   pm_tls_insecure = true
 
   pm_api_token_id     = var.proxmox_api_token_id

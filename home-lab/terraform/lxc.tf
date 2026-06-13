@@ -324,3 +324,38 @@ module "vault_lxc" {
     "security", "secrets-management"
   ]
 }
+
+module "tools_stack_lxc" {
+  source = "../../terraform-modules/proxmox/lxc"
+
+  node_name = "proxmox"
+  vm_id = "20072"
+
+  lxc_hostname   = "tools"
+  lxc_ostemplate = local.lxc_templates["debian_12"]
+
+  lxc_cores       = 1
+  lxc_memory      = 1024
+  lxc_memory_swap = 0
+
+  lxc_password    = var.default_password
+  ssh_public_keys = local.default_ssh_public_key
+
+  lxc_features_nesting = true
+  # lxc_features_keyctl  = true # Manually added
+
+  rootfs_storage = {
+    storage = "nvme4tb"
+    size    = "10G"
+  }
+
+  lxc_networks = [
+    {
+      name   = "eth0"
+      bridge = "vmbr0"
+      ip     = "dhcp"
+    }
+  ]
+
+  lxc_tags = []
+}
