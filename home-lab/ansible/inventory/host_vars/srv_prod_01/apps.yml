@@ -92,7 +92,7 @@ paperless_allowed_hosts: "paperless.internal"
 paperless_url: "https://paperless.internal"
 
 # Grimmory
-grimmory_image: "ghcr.io/grimmory-tools/grimmory:v3.2.10"
+grimmory_image: "ghcr.io/grimmory-tools/grimmory:v3.2.0"
 grimmory_db_image: "lscr.io/linuxserver/mariadb:11.4.12"
 
 # Jotty
