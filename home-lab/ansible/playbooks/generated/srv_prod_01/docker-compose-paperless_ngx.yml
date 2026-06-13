@@ -1,13 +1,13 @@
 services:
   broker:
-    image: docker.io/library/redis:8.6.2
+    image: docker.io/library/redis:8.8.0
     container_name: paperless-redis
     restart: unless-stopped
     volumes:
       - redisdata:/data
 
   db:
-    image: docker.io/library/postgres:17.9
+    image: docker.io/library/postgres:17.10
     container_name: paperless-db
     restart: unless-stopped
     volumes:
@@ -18,7 +18,7 @@ services:
       POSTGRES_PASSWORD: ${PAPERLESS_DBPASS}
 
   webserver:
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.13
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15
     container_name: paperless-web
     restart: unless-stopped
     depends_on:
