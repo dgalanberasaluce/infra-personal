@@ -1,0 +1,26 @@
+---
+# The name of the user that Ansible will use to connect via SSH
+ansible_setup_username: ansible
+
+# Shell assigned to the user.
+# Defaults to /bin/ash on Alpine Linux, /bin/bash on all other distributions.
+# Override this variable to set a specific shell.
+ansible_setup_shell: "{{ '/bin/ash' if ansible_os_family == 'Alpine' else '/bin/bash' }}"
+
+# List of SSH public keys to authorize for this user.
+# At least one key is required for secure, passwordless login.
+# Example:
+# ansible_setup_ssh_public_keys:
+#   - "ssh-ed25519 AAAA... user@host"
+ansible_setup_ssh_public_keys: []
+
+# Whether to allow passwordless sudo for the ansible user.
+# Highly recommended to keep this true for automation.
+ansible_setup_passwordless_sudo: true
+
+# Whether to lock the user's password (disable password-based login).
+# SSH key authentication is enforced instead.
+ansible_setup_lock_password: true
+
+# Minimum UID to use when creating the user (leave 0 for OS default)
+ansible_setup_uid: null

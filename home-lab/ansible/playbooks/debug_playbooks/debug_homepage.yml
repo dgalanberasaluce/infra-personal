@@ -1,0 +1,72 @@
+# ==============================================================================
+# Homepage Instances
+# ==============================================================================
+- name: Deploy Homepage Instances
+  hosts: local_server
+  become: false
+  vars:
+    # All apps across all inventory hosts that expose a homepage block.
+    # Used by deploy_homepage_instance.yml to build each instance's service list.
+    _all_homepage_apps: >-
+      {{
+        groups['all']
+        | map('extract', hostvars, 'applications')
+        | select('defined')
+        | flatten
+        | selectattr('homepage', 'defined')
+        | selectattr('homepage.name', 'defined')
+        | selectattr('domain', 'defined')
+        | list
+      }}
+  tasks:
+    - name: Print all the applications that are subject for homepage
+      ansible.builtin.debug:
+        var: _all_homepage_apps
+
+    - name: Print homepage attributes
+      ansible.builtin.debug:
+        var: app_item
+      loop: "{{ applications | default([]) | selectattr('role_name', 'equalto', 'homepage') | list }}"
+      loop_control:
+        loop_var: app_item
+
+    - name: "Deploy homepage instance"
+      ansible.builtin.debug:
+        msg:
+        - "Deploying homepage instance {{ app_item.app_name }}"
+      loop: "{{ applications | default([]) | selectattr('role_name', 'equalto', 'homepage') | list }}"
+      loop_control:
+        loop_var: app_item
+
+    - name: Debug tasks/deploy_homepage_instance.yml
+      block:
+      - name: Set fact
+        ansible.builtin.set_fact:
+          homepage_services: >-
+                {%- set services_list = [] -%}
+                {%- for host in groups['all'] -%}
+                  {%- if hostvars[host]['applications'] is defined -%}
+                    {%- for app in hostvars[host]['applications'] -%}
+                      {%- if app.homepage is defined -%}
+                        {%- set svc = app.homepage | combine({'href': 'https://' ~ app.domain}) -%}
+                        {%- set _ = services_list.append(svc) -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                {{ services_list }}
+
+      - name: Print facts
+        ansible.builtin.debug:
+          var: homepage_services
+
+      - name: "Deploy homepage instance"
+        # ansible.builtin.debug:
+        #   var: app_item.app_name
+        ansible.builtin.include_role:
+          name: homepage
+        vars:
+          app_name: "{{ app_item.app_name }}"
+        loop: "{{ applications | default([]) | selectattr('role_name', 'equalto', 'homepage') | list }}"
+        loop_control:
+          loop_var: app_item

@@ -124,7 +124,7 @@
         technitium_token: "{{ global_technitium_token}}"
         dns_record_name: "{{ app_item.domain.split('.')[0] }}"
         dns_zone_name: "{{ app_item.domain.split('.')[1] }}"
-        dns_record_type: "A"
+        dns_record_type: "CNAME"
         dns_record_value: "{{ hostvars['caddy_01']['ansible_host'] }}"
       
 # ==============================================================================

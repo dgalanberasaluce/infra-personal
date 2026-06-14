@@ -1,0 +1,41 @@
+---
+
+- name: Set up ansible user
+  hosts: all
+  become: true
+  gather_facts: true
+
+  # This playbook is designed to bootstrap a fresh host.
+  # Run it as:
+  # ansible-playbook -i inventory/your_inventory.yml playbooks/test_setup_role.yml --user root --ask-pass
+
+  vars:
+    # Stored in KeePass
+    ansible_setup_ssh_public_keys: []
+    
+    # You can also customize the username
+    # ansible_setup_username: custom_ansible_user
+
+  roles:
+    - role: ansible_user_setup
+
+  # post_tasks:
+  #   - name: Verify user creation
+  #     ansible.builtin.getent:
+  #       database: passwd
+  #       key: "{{ ansible_setup_username }}"
+  #     register: user_info
+
+  #   - name: Display user info
+  #     ansible.builtin.debug:
+  #       var: user_info.ansible_facts.getent_passwd
+
+  #   - name: Check sudoers file
+  #     ansible.builtin.stat:
+  #       path: "/etc/sudoers.d/{{ ansible_setup_username }}"
+  #     register: sudoers_stat
+
+  #   - name: Fail if sudoers file is missing
+  #     ansible.builtin.fail:
+  #       msg: "Sudoers file /etc/sudoers.d/{{ ansible_setup_username }} not found!"
+  #     when: not sudoers_stat.stat.exists

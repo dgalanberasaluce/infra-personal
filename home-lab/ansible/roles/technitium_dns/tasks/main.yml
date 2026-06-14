@@ -1,0 +1,73 @@
+---
+# Check if the Zone exists
+- name: "Check if DNS Zone '{{ dns_zone_name }}' exists"
+  ansible.builtin.uri:
+    url: "{{ technitium_api_url }}/api/zones/list?token={{ technitium_token }}&pageNumber=1&recordsPerPage=1000"
+    method: GET
+    return_content: true
+  register: zone_list_response
+  changed_when: false
+  tags: always
+
+# Create Zone if it is missing
+# - name: "Create DNS Zone '{{ dns_zone_name }}'"
+#   ansible.builtin.uri:
+#     url: "{{ technitium_api_url }}/api/zones/create?token={{ technitium_token }}&zone={{ dns_zone_name }}&type=Primary"
+#     method: POST
+#   when: "dns_zone_name not in (zone_list_response.json.response.data | map(attribute='name') | list)"
+#   register: zone_create_result
+
+# Get all records for the zone to check existence
+- name: "Get records for zone '{{ dns_zone_name }}'"
+  ansible.builtin.uri:
+    url: "{{ technitium_api_url }}/api/zones/records/get?domain={{ dns_zone_name }}&listZone=true&pageNumber=1&recordsPerPage=1000"
+    headers:
+      Authorization: "Bearer {{ technitium_token }}"
+    method: GET
+    return_content: true
+  register: zone_records_response
+  changed_when: false
+  tags: always
+
+# Find specific record (Jinja2 to filter the JSON list)
+- name: "Parse existing record data"
+  ansible.builtin.set_fact:
+    existing_record: "{{ zone_records_response.json.response.records | selectattr('name', 'equalto', dns_record_name + '.' + dns_zone_name) | selectattr('type', 'equalto', dns_record_type) | first | default(None) }}"
+  tags: always
+
+# Add Record (Only if it doesn't exist)
+- name: "Add DNS Record '{{ dns_record_name }}.{{ dns_zone_name }}' to '{{ technitium_api_url }}'"
+  ansible.builtin.uri:
+    url: "{{ technitium_api_url }}/api/zones/records/add"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ technitium_token }}"
+    body_format: form-urlencoded
+    body: 
+    - [ zone, "{{ dns_zone_name }}" ]
+    - [ domain, "{{ dns_record_name }}.{{ dns_zone_name }}" ]
+    - [ type, "{{ dns_record_type }}" ]
+    - [ value, "{{ dns_record_value }}" ]
+    - [ ttl, "{{ dns_record_ttl }}" ]
+  when: existing_record is none
+  tags: always
+
+# Update Record (Only if it exists BUT the value/IP is different)
+- name: "Update DNS Record '{{ dns_record_name }}.{{ dns_zone_name }}'"
+  ansible.builtin.uri:
+    url: "{{ technitium_api_url }}/api/zones/records/update"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ technitium_token }}"
+    body_format: form-urlencoded
+    body: 
+    - [ zone, "{{ dns_zone_name }}" ]
+    - [ domain, "{{ dns_record_name }}.{{ dns_zone_name }}" ]
+    - [ type, "{{ dns_record_type }}" ]
+    - [ value, "{{ existing_record.rData.ipAddress }}" ]
+    - [ newValue, "{{ dns_record_value }}" ]
+  no_log: true # prevents the token from showing in logs
+  when: 
+    - existing_record is not none
+    - existing_record.rData.ipAddress | default(existing_record.rData.cname) != dns_record_value
+  tags: always

@@ -1,0 +1,24 @@
+---
+# Default configuration for Technitium DNS role
+
+# Technitium DNS Server Base URL (e.g., http://localhost:5380)
+technitium_api_url: "http://localhost:5380"
+
+# API Token (Generate this in Technitium Web UI -> User -> API Tokens)
+technitium_token: "YOUR_SECRET_TOKEN_HERE"
+
+# The Zone to manage (e.g., "lan")
+dns_zone_name: "internal"
+
+# The Record Name (subdomain) (e.g., "plex" or "www")
+# Do not include the full domain here, just the hostname.
+dns_record_name: "server"
+
+# Record Type (A, CNAME, AAAA, TXT, etc.)
+dns_record_type: "A"
+
+# The Value (IP address or CNAME target)
+dns_record_value: "192.168.1.100"
+
+# TTL (Time To Live) in seconds
+dns_record_ttl: 3600

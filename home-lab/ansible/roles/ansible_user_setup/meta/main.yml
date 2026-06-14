@@ -1,0 +1,26 @@
+---
+galaxy_info:
+  role_name: ansible_user_setup
+  author: homelab
+  description: >
+    Creates a secure, dedicated Ansible user with SSH key-based authentication
+    and passwordless sudo. Designed to bootstrap Ansible access on fresh hosts.
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: Alpine
+      versions:
+        - "3.18"
+        - "3.19"
+        - "3.20"
+
+dependencies: []

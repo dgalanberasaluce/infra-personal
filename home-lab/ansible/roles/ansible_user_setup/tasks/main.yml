@@ -1,0 +1,76 @@
+---
+# ansible_user_setup/tasks/main.yml
+# Creates a secure, dedicated Ansible user with SSH key auth and sudoers access.
+
+- name: Ensure sudo is installed
+  ansible.builtin.package:
+    name: sudo
+    state: present
+
+- name: Ensure the ansible user group exists
+  ansible.builtin.group:
+    name: "{{ ansible_setup_username }}"
+    state: present
+    system: true
+
+- name: Create ansible user
+  ansible.builtin.user:
+    name: "{{ ansible_setup_username }}"
+    group: "{{ ansible_setup_username }}"
+    shell: "{{ ansible_setup_shell }}"
+    uid: "{{ ansible_setup_uid | default(omit) }}"
+    create_home: true
+    system: true
+    password: "{{ '!' if ansible_setup_lock_password else omit }}"
+    password_lock: "{{ ansible_setup_lock_password }}"
+    comment: "Ansible automation user"
+    state: present
+
+- name: Unlock user account on Alpine to allow SSH key authentication
+  # On Alpine Linux, a locked password (!) also blocks SSH login even with public keys.
+  # passwd -u removes the lock flag from /etc/shadow so key-based login works,
+  # while no actual password is set (the shadow entry remains empty/invalid).
+  ansible.builtin.command:
+    cmd: "passwd -u {{ ansible_setup_username }}"
+  when: ansible_os_family == "Alpine"
+  changed_when: false
+
+- name: Ensure .ssh directory exists for ansible user
+  ansible.builtin.file:
+    path: "/home/{{ ansible_setup_username }}/.ssh"
+    state: directory
+    owner: "{{ ansible_setup_username }}"
+    group: "{{ ansible_setup_username }}"
+    mode: "0700"
+
+- name: Authorize SSH public keys
+  ansible.posix.authorized_key:
+    user: "{{ ansible_setup_username }}"
+    key: "{{ item }}"
+    state: present
+    exclusive: false
+  loop: "{{ ansible_setup_ssh_public_keys }}"
+  when: ansible_setup_ssh_public_keys | length > 0
+
+- name: Warn if no SSH keys were provided
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: No SSH public keys provided for user '{{ ansible_setup_username }}'.
+      The user will not be accessible via key-based authentication.
+  when: ansible_setup_ssh_public_keys | length == 0
+
+- name: Configure passwordless sudo for ansible user
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: "/etc/sudoers.d/{{ ansible_setup_username }}"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "/usr/sbin/visudo -cf %s"
+  when: ansible_setup_passwordless_sudo
+
+- name: Remove sudoers entry when passwordless sudo is disabled
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ ansible_setup_username }}"
+    state: absent
+  when: not ansible_setup_passwordless_sudo

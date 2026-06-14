@@ -1,0 +1,13 @@
+---
+- name: Connection Debugger
+  hosts: all
+  gather_facts: true
+  
+  tasks:
+    - name: Print Connection Details
+      debug:
+        msg: 
+          - "SSH User: {{ ansible_user | default('Current System User') }}"
+          - "Effective User: {{ ansible_facts['user_id'] }}"
+          - "Home Directory: {{ ansible_facts['user_dir'] }}"
+          - "Inventory Hostname: {{ inventory_hostname }}"
