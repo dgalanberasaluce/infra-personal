@@ -15,7 +15,7 @@ applications:
 authentik_image: "ghcr.io/goauthentik/server:2026.5.3"
 authentik_postgres_image: "docker.io/library/postgres:16-alpine"
 authentik_redis_image: "docker.io/library/redis:8.8.0-alpine"
-cloudflare_tunnel_image: "cloudflare/cloudflared:2026.6.0"
+cloudflare_tunnel_image: "cloudflare/cloudflared:2026.6.1"
 
 ## Authentik configuration
 authentik_secret_key: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/sec-prod-01/secrets', engine_mount_point='ansible').data.data.authentik_secret }}"
