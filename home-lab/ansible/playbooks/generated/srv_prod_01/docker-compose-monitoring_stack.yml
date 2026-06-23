@@ -4,7 +4,7 @@ services:
   # TSDB
   # ---------------------------------------------------------
   victoriametrics:
-    image: victoriametrics/victoria-metrics:v1.144.0-scratch
+    image: victoriametrics/victoria-metrics:v1.146.0-scratch
     container_name: victoriametrics
     restart: unless-stopped
     security_opt:
@@ -100,7 +100,7 @@ services:
       - monitoring
 
   alloy:
-    image: grafana/alloy:v1.16.2
+    image: grafana/alloy:v1.17.0
     container_name: alloy
     hostname: "srv-prod-01"
     restart: unless-stopped
