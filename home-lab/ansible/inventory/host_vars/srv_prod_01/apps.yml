@@ -62,20 +62,20 @@ applications:
 # ==============================================================================
 # Tools Stack
 tools_stack_it_tools_image: "corentinth/it-tools:2024.10.22-7ca5933"
-tools_stack_cyberchef_image: "ghcr.io/gchq/cyberchef:11.0.0"
+tools_stack_cyberchef_image: "ghcr.io/gchq/cyberchef:11.2.0"
 tools_stack_drawio_image: "jgraph/drawio:29.7.12"
 tools_stack_bentopdf_image: "ghcr.io/alam00000/bentopdf-simple:2.8.5"
-tools_stack_plantuml_image: "plantuml/plantuml-server:v1.2026.5"
+tools_stack_plantuml_image: "plantuml/plantuml-server:v1.2026.6"
 tools_stack_convertx_image: "ghcr.io/c4illin/convertx:latest"
 tools_stack_omni_tools_image: "iib0011/omni-tools:0.6"
-tools_stack_bytestash_image: "ghcr.io/jordan-dalby/bytestash:1.5.11"
+tools_stack_bytestash_image: "ghcr.io/jordan-dalby/bytestash:1.5.12"
 tools_stack_memos_image: "neosmemo/memos:0.29.1"
 
 # Monitoring Stack
 monitoring_role: "server"
 monitor_docker: true
-monitoring_stack_alloy_image: "grafana/alloy:v1.16.2"
-monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.144.0-scratch"
+monitoring_stack_alloy_image: "grafana/alloy:v1.17.0"
+monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.146.0-scratch"
 monitoring_stack_loki_image: "grafana/loki:3.7"
 monitoring_stack_grafana_image: "grafana/grafana:12.4.4"
 monitoring_stack_pve_exporter_image: "prompve/prometheus-pve-exporter:3.9.0"
@@ -92,11 +92,11 @@ paperless_allowed_hosts: "paperless.internal"
 paperless_url: "https://paperless.internal"
 
 # Grimmory
-grimmory_image: "ghcr.io/grimmory-tools/grimmory:v3.2.0"
+grimmory_image: "ghcr.io/grimmory-tools/grimmory:v3.2.2"
 grimmory_db_image: "lscr.io/linuxserver/mariadb:11.4.12"
 
 # Jotty
-jotty_image: "ghcr.io/fccview/jotty:1.24.0"
+jotty_image: "ghcr.io/fccview/jotty:1.25.1"
 
 # ==============================================================================
 # 3. OPENBAO / HASHICORP VAULT LOOKUPS
