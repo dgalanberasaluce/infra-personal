@@ -40,7 +40,7 @@ services:
   # Data Visualization
   # ---------------------------------------------------------
   grafana:
-    image: grafana/grafana:12.4.4
+    image: grafana/grafana:12.4.5
     container_name: grafana
     restart: unless-stopped
     ports:
@@ -83,7 +83,7 @@ services:
   # Data Agent
   # ---------------------------------------------------------
   cadvisor:
-    image: ghcr.io/google/cadvisor:v0.60.1
+    image: ghcr.io/google/cadvisor:v0.60.2
     container_name: external_cadvisor
     volumes:
       - /:/rootfs:ro
