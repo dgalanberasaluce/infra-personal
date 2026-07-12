@@ -83,7 +83,7 @@ services:
   # Data Agent
   # ---------------------------------------------------------
   cadvisor:
-    image: ghcr.io/google/cadvisor:v0.60.2
+    image: ghcr.io/google/cadvisor:v0.60.5
     container_name: external_cadvisor
     volumes:
       - /:/rootfs:ro
