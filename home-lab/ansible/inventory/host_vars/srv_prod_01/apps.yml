@@ -79,7 +79,7 @@ monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.147
 monitoring_stack_loki_image: "grafana/loki:3.7"
 monitoring_stack_grafana_image: "grafana/grafana:12.4.5"
 monitoring_stack_pve_exporter_image: "prompve/prometheus-pve-exporter:3.9.0"
-monitoring_stack_cadvisor_image: "ghcr.io/google/cadvisor:v0.60.2"
+monitoring_stack_cadvisor_image: "ghcr.io/google/cadvisor:v0.60.5"
 
 # Linkwarden
 linkwarden_image: "ghcr.io/linkwarden/linkwarden:v2.15.1"
