@@ -4,7 +4,7 @@ services:
   # TSDB
   # ---------------------------------------------------------
   victoriametrics:
-    image: victoriametrics/victoria-metrics:v1.147.0-scratch
+    image: victoriametrics/victoria-metrics:v1.148.0-scratch
     container_name: victoriametrics
     restart: unless-stopped
     security_opt:
@@ -40,7 +40,7 @@ services:
   # Data Visualization
   # ---------------------------------------------------------
   grafana:
-    image: grafana/grafana:13.1.0
+    image: grafana/grafana:13.1.1
     container_name: grafana
     restart: unless-stopped
     ports:
@@ -100,7 +100,7 @@ services:
       - monitoring
 
   alloy:
-    image: grafana/alloy:v1.17.1
+    image: grafana/alloy:v1.18.0
     container_name: alloy
     hostname: "srv-prod-01"
     restart: unless-stopped
