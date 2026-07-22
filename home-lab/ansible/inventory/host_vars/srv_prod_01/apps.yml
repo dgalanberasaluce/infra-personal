@@ -74,10 +74,10 @@ tools_stack_memos_image: "neosmemo/memos:0.29.1"
 # Monitoring Stack
 monitoring_role: "server"
 monitor_docker: true
-monitoring_stack_alloy_image: "grafana/alloy:v1.17.1"
-monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.147.0-scratch"
+monitoring_stack_alloy_image: "grafana/alloy:v1.18.0"
+monitoring_stack_victoriametrics_image: "victoriametrics/victoria-metrics:v1.148.0-scratch"
 monitoring_stack_loki_image: "grafana/loki:3.7"
-monitoring_stack_grafana_image: "grafana/grafana:13.1.0"
+monitoring_stack_grafana_image: "grafana/grafana:13.1.1"
 monitoring_stack_pve_exporter_image: "prompve/prometheus-pve-exporter:3.9.0"
 monitoring_stack_cadvisor_image: "ghcr.io/google/cadvisor:v0.60.5"
 
@@ -93,7 +93,7 @@ paperless_url: "https://paperless.internal"
 
 # Grimmory
 grimmory_image: "ghcr.io/grimmory-tools/grimmory:v3.2.4"
-grimmory_db_image: "lscr.io/linuxserver/mariadb:11.4.12"
+grimmory_db_image: "lscr.io/linuxserver/mariadb:11.8.8"
 
 # Jotty
 jotty_image: "ghcr.io/fccview/jotty:1.25.1"
