@@ -30,8 +30,6 @@ services:
     volumes:
       - ./config/loki/loki-config.yaml:/etc/loki/local-config.yaml
       - loki_data:/loki
-    ports:
-      - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     networks:
     - monitoring
@@ -69,8 +67,6 @@ services:
   pve-exporter:
     image: prompve/prometheus-pve-exporter:3.9.0
     restart: unless-stopped
-    ports:
-      - "9221:9221"
     environment:
       - PVE_USER=${PVE_USER}
       - PVE_TOKEN_NAME=${PVE_TOKEN_NAME}
@@ -93,8 +89,7 @@ services:
       - /dev/disk:/dev/disk:ro
     devices:
       - /dev/kmsg # detect OOM
-#    ports:
-#      - "8078:8080"
+    restart: unless-stopped
     privileged: true
     networks:
       - monitoring
