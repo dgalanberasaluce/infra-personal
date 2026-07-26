@@ -14,8 +14,9 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Forgejo',
       items: [
-        // 'forgejo/forgejo-actions',
+        'forgejo/forgejo',
         'forgejo/forgejo-runner',
+        'forgejo/forgejo-actions',
         'forgejo/renovate'
       ]
     },
