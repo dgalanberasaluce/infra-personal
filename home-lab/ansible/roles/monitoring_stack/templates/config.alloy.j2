@@ -41,17 +41,20 @@ prometheus.scrape "linux_host" {
 
 // PVE Exporter Scrape only on server
 {% if monitoring_role == 'server' %}
-prometheus.scrape "proxmox_scraper" {
-  targets = [{
-    __address__ = "pve-exporter:9221",
-  }]
-  
-  // Proxmox IP
-  params = { "target" = ["{{ proxmox_server_ip }}"] } 
-  metrics_path = "/pve"
-  
-  forward_to = [prometheus.remote_write.victoriametrics.receiver]
-}
+//
+// TODO: Proxmox and monitoring stack are running on different VLANs. These VLANs are not connected
+//
+// prometheus.scrape "proxmox_scraper" {
+//  targets = [{
+//    __address__ = "pve-exporter:9221",
+//  }]
+//  
+//  // Proxmox IP
+//  params = { "target" = ["{{ proxmox_server_ip }}"] } 
+//  metrics_path = "/pve"
+//  
+//  forward_to = [prometheus.remote_write.victoriametrics.receiver]
+//}
 {% endif %}
 
 // ==========================================
