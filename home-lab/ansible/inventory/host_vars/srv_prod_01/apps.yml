@@ -62,7 +62,7 @@ applications:
 # ==============================================================================
 # Tools Stack
 tools_stack_bytestash_image: "ghcr.io/jordan-dalby/bytestash:1.5.12"
-tools_stack_memos_image: "neosmemo/memos:0.29.1"
+tools_stack_memos_image: "neosmemo/memos:0.30.0"
 
 # Monitoring Stack
 monitoring_role: "server"
