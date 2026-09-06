@@ -10,4 +10,6 @@ applications:
       group: "Security"
       icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/openbao.svg
 
-openbao_image: "openbao/openbao:2.5.0"
+openbao_image: "openbao/openbao:2.6.2"
+openbao_uid: 2001
+openbao_gid: 2001
