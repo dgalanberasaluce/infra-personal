@@ -1,6 +1,6 @@
 services:
   jotty:
-    image: ghcr.io/fccview/jotty:1.26.1
+    image: ghcr.io/fccview/jotty:1.27.0
     container_name: jotty
     user: "2002:991"
     ports:
